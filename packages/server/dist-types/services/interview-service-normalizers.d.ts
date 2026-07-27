@@ -1,11 +1,11 @@
 import type { InterviewAnalysis, InterviewConfig, InterviewQuestion, InterviewResponse, InterviewSession } from "@bao/shared/types/interview";
 import type { DBInterviewSession } from "./interview-service-contracts";
-export declare function normalizeQuestionType(value: unknown, fallback: InterviewQuestion["type"]): InterviewQuestion["type"];
-export declare function normalizeDifficulty(value: unknown): InterviewQuestion["difficulty"];
-export declare function normalizeQuestions(raw: unknown): InterviewQuestion[];
+export declare function normalizeQuestionType<T>(value: T, fallback: InterviewQuestion["type"]): InterviewQuestion["type"];
+export declare function normalizeDifficulty<T>(value: T): InterviewQuestion["difficulty"];
+export declare function normalizeQuestions<T>(raw: T): InterviewQuestion[];
 export declare function normalizeScore(value: number): number;
-export declare function normalizeAiAnalysisScore(scoreCandidate: unknown): number;
-export declare function normalizeResponses(raw: unknown): InterviewResponse[];
-export declare function normalizeFinalAnalysis(raw: unknown): InterviewAnalysis | null;
-export declare function normalizeInterviewSessionStatus(value: unknown): InterviewSession["status"];
+export declare function normalizeAiAnalysisScore<T>(scoreCandidate: T): number;
+export declare function normalizeResponses<T>(raw: T): InterviewResponse[];
+export declare function normalizeFinalAnalysis<T>(raw: T): InterviewAnalysis | null;
+export declare function normalizeInterviewSessionStatus<T>(value: T): InterviewSession["status"];
 export declare function normalizeSessionConfig(row: DBInterviewSession): InterviewConfig;

@@ -44,7 +44,7 @@ export function toRouteError(
  * Maps automation service errors to HTTP status and error envelope.
  * Single source of truth for automation route error handling.
  */
-export function mapAutomationRouteError(error: unknown): AutomationRouteErrorResult {
+export function mapAutomationRouteError(error: Error | string): AutomationRouteErrorResult {
   if (error instanceof AutomationValidationError) {
     return {
       status: HTTP_STATUS_UNPROCESSABLE_ENTITY,

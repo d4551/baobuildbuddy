@@ -11,7 +11,7 @@ import {
   scrapedStudioSchema,
 } from "@bao/shared/schemas/automation-scripts.schema";
 import type { JobSearchResult } from "@bao/shared/types/jobs";
-import { safeParseJson } from "@bao/shared/utils/json";
+import { type JsonObject, type JsonValue, safeParseJson } from "@bao/shared/utils/json";
 import { generateId } from "@bao/shared/utils/validation";
 import { config } from "../config/env";
 import { runAutomationScript } from "./automation/rpa-runner-process";
@@ -31,12 +31,12 @@ import {
   DEFAULT_JOB_TYPE,
 } from "./scraper-service-contracts";
 
-const asRecord = (value: unknown): Record<string, unknown> | null =>
+const asRecord = <T>(value: T): JsonObject | null =>
   typeof value === "object" && value !== null && !Array.isArray(value)
     ? Object.fromEntries(Object.entries(value))
     : null;
 
-const parseJsonRows = (raw: unknown): unknown[] => {
+const parseJsonRows = <T>(raw: T): JsonValue[] => {
   if (Array.isArray(raw)) {
     return raw;
   }
@@ -53,7 +53,7 @@ const parseJsonRows = (raw: unknown): unknown[] => {
     return asObject.rows;
   }
 
-  return [raw];
+  return [raw as JsonValue];
 };
 
 const normalizeHashInput = (value: string | undefined): string =>
@@ -160,7 +160,7 @@ export const runScraperScript = async (
   };
 };
 
-export const parseStudioRows = (raw: unknown): ScriptRows<ScrapedStudio> => {
+export const parseStudioRows = <T>(raw: T): ScriptRows<ScrapedStudio> => {
   const rows = parseJsonRows(raw);
   const parsedRows: ScrapedStudio[] = [];
   const rowErrors: string[] = [];
@@ -179,7 +179,7 @@ export const parseStudioRows = (raw: unknown): ScriptRows<ScrapedStudio> => {
   return { rows: parsedRows, rowErrors };
 };
 
-export const parseJobRows = (raw: unknown): ScriptRows<ScrapedJob> => {
+export const parseJobRows = <T>(raw: T): ScriptRows<ScrapedJob> => {
   const rows = parseJsonRows(raw);
   const parsedRows: ScrapedJob[] = [];
   const rowErrors: string[] = [];

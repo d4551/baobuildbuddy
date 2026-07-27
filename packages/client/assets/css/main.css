@@ -12,13 +12,13 @@
  * Reference: docs/design.md (Glassmorphism: a complete UI/UX definition).
  */
 @import "tailwindcss/index.css";
-@import "./resume-preview.generated.css";
+@import "./tokens-resume-preview.generated.css";
 @import "./tokens.css";
-@import "./base.css";
+@import "./theme-base.css";
 @import "./glass.css";
 @import "./motion.css";
-@import "./a11y-preferences.css";
-@import "./shell.css";
+@import "./theme-a11y-preferences.css";
+@import "./theme-shell.css";
 
 @plugin "daisyui" {
   themes:

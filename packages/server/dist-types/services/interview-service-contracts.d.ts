@@ -1,9 +1,15 @@
 import type { InterviewAnalysis, InterviewConfig, InterviewConversationStyle, InterviewResponse, VoiceSettings } from "@bao/shared/types/interview";
 import type { ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import type { interviewSessions } from "../db/schema/interviews";
 export type DBInterviewSession = typeof interviewSessions.$inferSelect;
-export type InterviewConfigInput = Record<string, unknown>;
-export type JsonRecord = Record<string, unknown>;
+/**
+ * Config input accepted by normalizeConfig. Values are narrowed by generic
+ * parsers internally, so the record accepts JSON values, typed objects
+ * (InterviewTargetJob, VoiceSettings, etc.), null, or undefined.
+ */
+export type InterviewConfigInput = Readonly<Record<string, JsonValue | object | null | undefined>>;
+export type JsonRecord = JsonObject;
 export interface StudioContext {
     id: string;
     name: string;
@@ -11,7 +17,7 @@ export interface StudioContext {
     interviewStyle: string;
     technologies: string[];
     games: string[];
-    culture: Record<string, unknown>;
+    culture: JsonObject;
     location: string;
     type: string;
     remoteWork: boolean;
@@ -48,7 +54,7 @@ export type FallbackInterviewContext = {
     hiringSignal: string;
     pitchAngle: string;
 };
-export type NormalizeVoiceSettings = (raw: unknown) => VoiceSettings | undefined;
+export type NormalizeVoiceSettings = <T>(raw: T) => VoiceSettings | undefined;
 export type NormalizeConfig = (raw: InterviewConfigInput) => InterviewConfig;
-export type NormalizeQuestionFeedback = (raw: unknown) => NonNullable<InterviewResponse["aiAnalysis"]> | null;
-export type NormalizeFinalAnalysis = (raw: unknown) => InterviewAnalysis | null;
+export type NormalizeQuestionFeedback = <T>(raw: T) => NonNullable<InterviewResponse["aiAnalysis"]> | null;
+export type NormalizeFinalAnalysis = <T>(raw: T) => InterviewAnalysis | null;

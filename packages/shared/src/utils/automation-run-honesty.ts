@@ -4,15 +4,15 @@
  */
 
 export type AutomationStepLike = {
-  readonly action?: unknown;
-  readonly status?: unknown;
-  readonly message?: unknown;
+  readonly action?: string;
+  readonly status?: string;
+  readonly message?: string;
 };
 
 export type AutomationOutputLike = {
-  readonly success?: unknown;
-  readonly steps?: unknown;
-  readonly error?: unknown;
+  readonly success?: boolean;
+  readonly steps?: ReadonlyArray<AutomationStepLike | null>;
+  readonly error?: string;
 };
 
 const NO_CONFIRMATION = "no confirmation text detected";
@@ -31,7 +31,7 @@ export function isDishonestJobApplySuccess(args: {
   readonly type: string;
   readonly status: string;
   readonly output: AutomationOutputLike | null | undefined;
-  readonly error?: unknown;
+  readonly error?: string | null;
 }): boolean {
   if (args.type !== "job_apply" || args.status !== "success") {
     return false;
@@ -64,7 +64,7 @@ export function resolveHonestAutomationRunStatus(args: {
   readonly type: string;
   readonly status: string;
   readonly output: AutomationOutputLike | null | undefined;
-  readonly error?: unknown;
+  readonly error?: string | null;
 }): string {
   if (isDishonestJobApplySuccess(args)) {
     return "error";

@@ -1,71 +1,43 @@
 import { readdir } from "node:fs/promises";
-import { join } from "node:path";
-import { APP_BRAND } from "../packages/shared/src/constants/branding";
 import { DEFAULT_I18N_LOCALE_COOKIE_KEY } from "../packages/shared/src/constants/client-config";
-import { APP_ROUTES } from "../packages/shared/src/constants/routes";
 import {
-  DEFAULT_VERIFY_HOST,
-  DEFAULT_VERIFY_PORT,
   PREVIEW_LOG_LIMIT,
   PREVIEW_POLL_INTERVAL_MS,
   PREVIEW_READY_TIMEOUT_MS,
-  PREVIEW_SEPARATOR_LENGTH,
 } from "../packages/shared/src/constants/scripts";
 import { APP_LANGUAGE_CODES } from "../packages/shared/src/constants/settings";
 import { writeError, writeOutput } from "./utils/cli-output";
-
-const NUM_26 = 26;
-const NUM_5 = 5;
-
-type RouteVerificationResult = {
-  locale: string;
-  route: string;
-  status: number;
-  heading: string;
-  title: string;
-};
-
-type RouteVerificationFailure = {
-  locale: string;
-  route: string;
-  status: number;
-  reason: string;
-};
+import {
+  CLIENT_BUILD_CHUNKS_PATH,
+  CLIENT_BUILD_OUTPUT_PATH,
+  CLIENT_OUTPUT_ROOT,
+  CLIENT_PACKAGE_ROOT,
+  EXTERNAL_VERIFY_BASE_URL,
+  LINE_SEPARATOR,
+  NUM_26,
+  NUM_5,
+  ROUTE_PATHS,
+  VERIFY_BASE_URL,
+  VERIFY_HOST,
+  VERIFY_PORT,
+} from "./utils/verify-pages-env";
+import {
+  createRouteFailure,
+  type RouteVerificationFailure,
+  type RouteVerificationResult,
+  verifyHtmlContent,
+} from "./utils/verify-pages-html";
 
 type PreviewProcess = ReturnType<typeof Bun.spawn>;
 
-const VERIFY_HOST = process.env.VERIFY_HOST || DEFAULT_VERIFY_HOST;
-const VERIFY_PORT = process.env.VERIFY_PORT || DEFAULT_VERIFY_PORT;
-const DEFAULT_VERIFY_BASE_URL = `http://${VERIFY_HOST}:${VERIFY_PORT}`;
-const EXTERNAL_VERIFY_BASE_URL = process.env.VERIFY_BASE_URL?.replace(/\/$/u, "") ?? null;
-const VERIFY_BASE_URL = EXTERNAL_VERIFY_BASE_URL ?? DEFAULT_VERIFY_BASE_URL;
-const CLIENT_PACKAGE_ROOT = join(process.cwd(), "packages", "client");
-const CLIENT_OUTPUT_ROOT = join(CLIENT_PACKAGE_ROOT, ".output");
-const CLIENT_BUILD_OUTPUT_PATH = join(CLIENT_PACKAGE_ROOT, ".output", "server", "index.mjs");
-const CLIENT_BUILD_CHUNKS_PATH = join(CLIENT_PACKAGE_ROOT, ".output", "server", "chunks");
-const htmlHeadingPattern = /<h1\b[^>]*>([\s\S]*?)<\/h1>/iu;
-const htmlTitlePattern = /<title\b[^>]*>([\s\S]*?)<\/title>/iu;
-const htmlMainPattern = /<main\b[^>]*>/iu;
-const htmlTagPattern = /<[^>]+>/gu;
-const whitespacePattern = /\s+/gu;
-const lineSeparator = "-".repeat(PREVIEW_SEPARATOR_LENGTH);
-const expectedBrandToken = APP_BRAND.name.toLowerCase();
-const routePaths = Array.from(new Set(Object.values(APP_ROUTES)));
+type EnvMap = Readonly<Record<string, string | undefined>>;
 
-const normalizeText = (value: string): string =>
-  value.replace(htmlTagPattern, " ").replace(whitespacePattern, " ").trim();
-
-const createRouteFailure = (
-  locale: string,
-  route: string,
-  status: number,
-  reason: string,
-): RouteVerificationFailure => ({
-  locale,
-  route,
-  status,
-  reason,
-});
+const readRuntimeEnv = (): EnvMap => {
+  const runtime = globalThis as {
+    process?: { env?: EnvMap };
+  };
+  return runtime.process?.env ?? {};
+};
 
 const pushBoundedLine = (target: string[], value: string): void => {
   const normalized = value.trim();
@@ -94,7 +66,7 @@ const readPreviewLogs = async (
   const consumeResult = async (): Promise<void> => {
     const readResult = await reader.read();
     if (readResult.done) {
-      const trailing = `${pending}${decoder.decode()}`.trim();
+      const trailing = [pending, decoder.decode()].join("").trim();
       if (trailing.length > 0) {
         pushBoundedLine(target, trailing);
       }
@@ -102,7 +74,7 @@ const readPreviewLogs = async (
     }
 
     if (readResult.value.length > 0) {
-      const chunk = `${pending}${decoder.decode(readResult.value, { stream: true })}`;
+      const chunk = [pending, decoder.decode(readResult.value, { stream: true })].join("");
       const lines = chunk.split(/\r?\n/gu);
       pending = lines.pop() ?? "";
       for (const line of lines) {
@@ -164,9 +136,9 @@ const spawnPreviewProcess = (): PreviewProcess =>
     stdout: "pipe",
     stderr: "pipe",
     env: {
-      ...process.env,
-      PORT: DEFAULT_VERIFY_PORT,
-      HOST: DEFAULT_VERIFY_HOST,
+      ...readRuntimeEnv(),
+      PORT: VERIFY_PORT,
+      HOST: VERIFY_HOST,
     },
   });
 
@@ -192,69 +164,22 @@ const waitForPreviewReady = async (baseUrl: string): Promise<boolean> => {
   return pollPreviewReady(baseUrl, deadline);
 };
 
-const verifyHtmlContent = (
-  locale: string,
-  route: string,
-  status: number,
-  html: string,
-): RouteVerificationResult | RouteVerificationFailure => {
-  if (route === "/" && !html.toLowerCase().includes(expectedBrandToken)) {
-    return createRouteFailure(
-      locale,
-      route,
-      status,
-      `Root route did not include expected brand token "${APP_BRAND.name}".`,
-    );
-  }
-
-  const headingMatch = html.match(htmlHeadingPattern);
-  const heading = normalizeText(headingMatch?.[1] ?? "");
-  if (heading.length === 0) {
-    return createRouteFailure(
-      locale,
-      route,
-      status,
-      "No non-empty <h1> heading found in SSR HTML.",
-    );
-  }
-
-  const titleMatch = html.match(htmlTitlePattern);
-  const title = normalizeText(titleMatch?.[1] ?? "");
-  if (title.length === 0) {
-    return createRouteFailure(locale, route, status, "No non-empty <title> found in SSR HTML.");
-  }
-
-  if (!htmlMainPattern.test(html)) {
-    return createRouteFailure(locale, route, status, "No <main> landmark found in SSR HTML.");
-  }
-
-  return {
-    locale,
-    route,
-    status,
-    heading,
-    title,
-  };
-};
-
 const verifyRoute = async (
   locale: string,
   route: string,
 ): Promise<RouteVerificationResult | RouteVerificationFailure> => {
-  const response = await fetch(`${VERIFY_BASE_URL}${route}`, {
+  const requestUrl = [VERIFY_BASE_URL, route].join("");
+  const localeCookie = [DEFAULT_I18N_LOCALE_COOKIE_KEY, "=", locale].join("");
+  const response = await fetch(requestUrl, {
     headers: {
       "accept-language": locale,
-      cookie: `${DEFAULT_I18N_LOCALE_COOKIE_KEY}=${locale}`,
+      cookie: localeCookie,
     },
   });
 
   if (!response.ok) {
-    return createRouteFailure(
-      locale,
-      route,
-      response.status,
-      `Expected 2xx status but received ${response.status}.`,
-    );
+    const reason = ["Expected 2xx status but received ", String(response.status), "."].join("");
+    return createRouteFailure(locale, route, response.status, reason);
   }
 
   const html = await response.text();
@@ -266,7 +191,7 @@ const verifyRoutes = async (): Promise<{
   failures: RouteVerificationFailure[];
 }> => {
   const tasks = APP_LANGUAGE_CODES.flatMap((locale) =>
-    routePaths.map((route) => verifyRoute(locale, route)),
+    ROUTE_PATHS.map((route) => verifyRoute(locale, route)),
   );
   const results = await Promise.all(tasks);
   const successes: RouteVerificationResult[] = [];
@@ -280,45 +205,62 @@ const verifyRoutes = async (): Promise<{
     }
   }
 
-  return {
-    successes,
-    failures,
-  };
+  return { successes, failures };
 };
+
+const formatSuccessLine = (success: RouteVerificationResult): string =>
+  [
+    "[ok] ",
+    success.locale.padEnd(NUM_5),
+    " ",
+    String(success.status),
+    " ",
+    success.route.padEnd(NUM_26),
+    " ",
+    success.heading,
+    " | ",
+    success.title,
+  ].join("");
+
+const formatFailureLine = (failure: RouteVerificationFailure): string =>
+  [
+    "[fail] ",
+    failure.locale.padEnd(NUM_5),
+    " ",
+    String(failure.status),
+    " ",
+    failure.route.padEnd(NUM_26),
+    " ",
+    failure.reason,
+  ].join("");
 
 const writeRouteSummary = async (
   successes: RouteVerificationResult[],
   failures: RouteVerificationFailure[],
 ): Promise<void> => {
-  await writeOutput(`Route/content verification against ${VERIFY_BASE_URL}`);
-  await writeOutput(lineSeparator);
+  const summaryHeader = ["Route/content verification against ", VERIFY_BASE_URL].join("");
+  await writeOutput(summaryHeader);
+  await writeOutput(LINE_SEPARATOR);
 
-  const successLines = successes.map(
-    (success) =>
-      `[ok] ${success.locale.padEnd(NUM_5)} ${success.status} ${success.route.padEnd(NUM_26)} ${success.heading} | ${success.title}`,
-  );
+  const successLines = successes.map(formatSuccessLine);
   if (successLines.length > 0) {
     await writeOutput(successLines.join("\n"));
   }
 
   if (failures.length === 0) {
-    await writeOutput(lineSeparator);
-    await writeOutput(
-      `Verified ${successes.length} localized route renders with non-empty page title, heading, and main landmark.`,
-    );
+    await writeOutput(LINE_SEPARATOR);
+    const verifiedMessage = [
+      "Verified ",
+      String(successes.length),
+      " localized route renders with non-empty page title, heading, and main landmark.",
+    ].join("");
+    await writeOutput(verifiedMessage);
     return;
   }
 
-  await writeError(lineSeparator);
+  await writeError(LINE_SEPARATOR);
   await writeError("Route/content verification failures:");
-  await writeError(
-    failures
-      .map(
-        (failure) =>
-          `[fail] ${failure.locale.padEnd(NUM_5)} ${failure.status} ${failure.route.padEnd(NUM_26)} ${failure.reason}`,
-      )
-      .join("\n"),
-  );
+  await writeError(failures.map(formatFailureLine).join("\n"));
   process.exit(1);
 };
 

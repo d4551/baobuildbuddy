@@ -70,22 +70,19 @@ const page = useJobsIndexPage();
         {{ t("jobsPage.recommendationsTitle") }}
       </h2>
       <SectionGrid grid-token="twoColumn">
-        <UiGlassCard
+        <JobSummaryCard
           v-for="(job, index) in page.recommendations.value.slice(0, UI_RECOMMENDATION_PREVIEW_LIMIT)"
           :key="`rec-${job.id}`"
+          :job="job"
+          density="compact"
           :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
           :link-aria-label="t('jobsPage.openRecommendationAria', { title: job.title, company: job.company })"
           :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
-        >
-          <JobSummaryCard
-            :job="job"
-            density="compact"
-            :experience-label="(value) => page.experienceOptionLabel(value)"
-            :format-date="(value) => page.formatDate(value)"
-            @interview="page.interviewJob"
-            @view="page.viewJob"
-          />
-        </UiGlassCard>
+          :experience-label="(value) => page.experienceOptionLabel(value)"
+          :format-date="(value) => page.formatDate(value)"
+          @interview="page.interviewJob"
+          @view="page.viewJob"
+        />
       </SectionGrid>
     </section>
 
@@ -190,21 +187,18 @@ const page = useJobsIndexPage();
 
         <div v-else>
           <SectionGrid grid-token="twoColumn" :extra-class="SECTION_GAP_BOTTOM_CLASS">
-            <UiGlassCard
+            <JobSummaryCard
               v-for="(job, index) in page.paginatedJobs.value"
               :key="job.id"
+              :job="job"
               :to="APP_ROUTE_BUILDERS.jobDetail(job.id)"
               :link-aria-label="t('jobsPage.openJobAria', { title: job.title, company: job.company })"
               :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
-            >
-              <JobSummaryCard
-                :job="job"
-                :experience-label="(value) => page.experienceOptionLabel(value)"
-                :format-date="(value) => page.formatDate(value)"
-                @interview="page.interviewJob"
-                @view="page.viewJob"
-              />
-            </UiGlassCard>
+              :experience-label="(value) => page.experienceOptionLabel(value)"
+              :format-date="(value) => page.formatDate(value)"
+              @interview="page.interviewJob"
+              @view="page.viewJob"
+            />
           </SectionGrid>
 
           <AppPagination

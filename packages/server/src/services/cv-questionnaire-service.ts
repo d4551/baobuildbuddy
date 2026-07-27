@@ -31,7 +31,7 @@ export interface CvQuestionnaireConfig {
   experienceLevel?: string;
 }
 
-const isCvQuestion = (value: unknown): value is CvQuestion =>
+const isCvQuestion = <T>(value: T): value is T & CvQuestion =>
   isRecord(value) &&
   typeof value.id === "string" &&
   typeof value.question === "string" &&

@@ -3,9 +3,9 @@ import {
   AI_MAX_TOKENS_WS,
 } from "@bao/shared/constants/ai-generation";
 import { API_ERROR_GENERATE_RESPONSE } from "@bao/shared/constants/api-errors";
-import { resolveBrandSettings } from "@bao/shared/constants/branding";
+import { resolveBrandSettings } from "@bao/shared/tokens/branding";
 import { toApiScopedPath, WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
-import { safeParseJson } from "@bao/shared/utils/json";
+import { type JsonObject, safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
@@ -42,7 +42,7 @@ type RuntimeBrand = ReturnType<typeof resolveBrandSettings>;
 
 const JOB_APPLY_ACTION_PATTERN = /\{"action"\s*:\s*"job_apply"[^{}]*\}/;
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isRecord<T>(value: T): value is T & JsonObject {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
@@ -64,7 +64,7 @@ function parseAutomationActionPayload(raw: string): AutomationActionPayload | nu
   };
 }
 
-function sendSocketPayload(socket: ChatSocket, payload: Record<string, unknown>): void {
+function sendSocketPayload(socket: ChatSocket, payload: JsonObject): void {
   socket.send(JSON.stringify(payload));
 }
 
@@ -104,10 +104,7 @@ async function createAiService(config: SettingsRow | undefined): Promise<AIServi
   return AIService.fromSettings(config);
 }
 
-function getAutomationActionMessage(
-  streamedText: string,
-  sessionId: string,
-): Record<string, unknown> | null {
+function getAutomationActionMessage(streamedText: string, sessionId: string): JsonObject | null {
   const actionMatch = streamedText.match(JOB_APPLY_ACTION_PATTERN);
   if (!actionMatch) {
     return null;

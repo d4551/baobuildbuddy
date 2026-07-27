@@ -8,7 +8,7 @@ import {
   AI_CHAT_CONTEXT_SKILL_MAPPINGS_LIMIT,
   AI_CHAT_HISTORY_FETCH_LIMIT,
 } from "@bao/shared/constants/ai-chat";
-import { resolveBrandSettings } from "@bao/shared/constants/branding";
+import { resolveBrandSettings } from "@bao/shared/tokens/branding";
 import type { AIChatContextDomain, ChatMessage } from "@bao/shared/types/ai";
 import type { BrandSettings } from "@bao/shared/types/settings-contracts";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";

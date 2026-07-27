@@ -1,5 +1,5 @@
 import { normalizeAIRouting } from "@bao/shared/constants/ai-provider";
-import { normalizeAppDataTheme, resolveBrandSettings } from "@bao/shared/constants/branding";
+import { normalizeAppDataTheme, resolveBrandSettings } from "@bao/shared/tokens/branding";
 import { DEFAULT_JOB_TAXONOMY_SETTINGS } from "@bao/shared/constants/jobs-taxonomy";
 import { APP_LANGUAGE_CODES, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import type { JobTaxonomySettings } from "@bao/shared/types/jobs-taxonomy";

@@ -1,4 +1,4 @@
-import { DEFAULT_BRAND_SETTINGS } from "./branding";
+import { DEFAULT_BRAND_SETTINGS } from "../tokens/branding";
 
 /**
  * Default brand tagline shown in app-shell and metadata surfaces.

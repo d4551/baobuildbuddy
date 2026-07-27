@@ -3,7 +3,7 @@
  */
 
 import { SCHEMA_MAX_ITEMS_XXLARGE } from "@bao/shared/constants/schema-limits";
-import { safeParseJson } from "@bao/shared/utils/json";
+import { type JsonObject, safeParseJson } from "@bao/shared/utils/json";
 import { JOB_AGGREGATOR_USER_AGENT, type JobProvider, type RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
@@ -29,10 +29,10 @@ interface GreenhouseResponse {
   jobs: GreenhouseJob[];
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
+const isRecord = <T>(value: T): value is T & JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const isGreenhouseJob = (value: unknown): value is GreenhouseJob => {
+const isGreenhouseJob = <T>(value: T): value is T & GreenhouseJob => {
   if (!isRecord(value)) {
     return false;
   }
@@ -45,7 +45,7 @@ const isGreenhouseJob = (value: unknown): value is GreenhouseJob => {
   );
 };
 
-const isGreenhouseResponse = (value: unknown): value is GreenhouseResponse =>
+const isGreenhouseResponse = <T>(value: T): value is T & GreenhouseResponse =>
   isRecord(value) && Array.isArray(value.jobs) && value.jobs.every(isGreenhouseJob);
 
 type GreenhouseFetchStatus =

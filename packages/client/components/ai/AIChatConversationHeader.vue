@@ -39,9 +39,10 @@ const { t } = useI18n();
     >
       <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack3]">
         <div>
-          <h1 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3]">
+          <!-- Level two: the page scaffold owns the single top-level heading. -->
+          <h2 :class="[FONT_WEIGHT_TOKEN_CLASS.bold, TYPOGRAPHY_SCALE_CLASS.xl3]">
             {{ t("aiChatPage.title", { brand: brandName }) }}
-          </h1>
+          </h2>
           <p class="text-base text-secondary">{{ t("aiChatPage.subtitle") }}</p>
         </div>
         <!-- Below xl the sidebar is hidden; header owns context chips. At xl+ sidebar owns them. -->

@@ -18,13 +18,13 @@ export const UI_SSOT_AUTHORITY_PATHS = new Set<string>([
   // raw design-token values; the rest consume it via var().
   "packages/client/assets/css/main.css",
   "packages/client/assets/css/tokens.css",
-  "packages/client/assets/css/base.css",
+  "packages/client/assets/css/theme-base.css",
   "packages/client/assets/css/glass.css",
   "packages/client/assets/css/motion.css",
-  "packages/client/assets/css/a11y-preferences.css",
-  "packages/client/assets/css/shell.css",
+  "packages/client/assets/css/theme-a11y-preferences.css",
+  "packages/client/assets/css/theme-shell.css",
   // Generated from RESUME_EXPORT_THEME_CONFIGS; drift locked by validate:resume-preview-css.
-  "packages/client/assets/css/resume-preview.generated.css",
+  "packages/client/assets/css/tokens-resume-preview.generated.css",
 ]);
 
 export const isUiSsotAuthority = (filePath: string): boolean =>

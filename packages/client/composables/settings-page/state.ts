@@ -1,4 +1,4 @@
-import { THEME_NAMES } from "@bao/shared/constants/branding";
+import { THEME_NAMES } from "@bao/shared/tokens/branding";
 import type { AppSettings } from "@bao/shared/types/settings-contracts";
 import { computed, type Ref, watch } from "vue";
 import { toAppSettings } from "../api-normalizer-settings";

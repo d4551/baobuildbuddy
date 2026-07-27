@@ -32,7 +32,12 @@ export interface StudioCulture {
   environment?: string;
 }
 
-export interface InterviewConfig {
+/**
+ * Type alias, not an interface: interview config is persisted and re-read as a
+ * JSON column, so it must stay assignable to `JsonObject`. Only aliases receive
+ * an implicit index signature.
+ */
+export type InterviewConfig = {
   roleType: string;
   roleCategory?: string;
   experienceLevel: string;
@@ -49,7 +54,7 @@ export interface InterviewConfig {
   conversationStyle?: InterviewConversationStyle;
   targetJob?: InterviewTargetJob;
   candidateContext?: InterviewCandidateContext;
-}
+};
 
 export interface InterviewQuestion {
   id: string;

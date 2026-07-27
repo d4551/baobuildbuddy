@@ -1,5 +1,6 @@
 import type { GamingPortalConfig, GamingPortalId } from "@bao/shared/types/settings-contracts";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import type { JsonValue } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { createServerLogger } from "../../../utils/logger";
@@ -19,7 +20,11 @@ const PORTAL_SCRAPE_METHOD_BY_ID: Record<GamingPortalId, PortalScrapeMethod> = {
 };
 const gamingProviderLogger = createServerLogger("gaming-providers");
 
-const logProviderFailure = (providerName: string, reason: string, details?: unknown): RawJob[] => {
+const logProviderFailure = (
+  providerName: string,
+  reason: string,
+  details?: JsonValue,
+): RawJob[] => {
   gamingProviderLogger.error("Job provider fetch failed", {
     providerName,
     reason,
@@ -28,7 +33,7 @@ const logProviderFailure = (providerName: string, reason: string, details?: unkn
   return [];
 };
 
-const logProviderSkip = (providerName: string, reason: string, details?: unknown): RawJob[] => {
+const logProviderSkip = (providerName: string, reason: string, details?: JsonValue): RawJob[] => {
   gamingProviderLogger.info("Job provider fetch skipped", {
     providerName,
     reason,

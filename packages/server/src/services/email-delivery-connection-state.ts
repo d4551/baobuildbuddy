@@ -9,17 +9,17 @@ import { SMTP_LINE_BREAK } from "./email-delivery-message";
 const SMTP_RESPONSE_LINE_PATTERN = /^(\d{3})([ -])(.*)$/;
 
 export interface PendingResponseReader {
-  reject: (reason?: unknown) => void;
+  reject: (reason?: Error | string) => void;
   resolve: (response: SmtpResponse) => void;
 }
 
 export interface PendingDrainReader {
-  reject: (reason?: unknown) => void;
+  reject: (reason?: Error | string) => void;
   resolve: () => void;
 }
 
 export interface PendingTlsUpgrade {
-  reject: (reason?: unknown) => void;
+  reject: (reason?: Error | string) => void;
   resolve: () => void;
 }
 
@@ -148,7 +148,7 @@ export const resolvePendingDrain = (state: SmtpConnectionState): void => {
   pendingDrain.resolve();
 };
 
-export const rejectAllPending = (state: SmtpConnectionState, reason: unknown): void => {
+export const rejectAllPending = (state: SmtpConnectionState, reason: Error | string): void => {
   const pendingReaders = state.pendingReaders.splice(0);
   for (const pendingReader of pendingReaders) {
     pendingReader.reject(reason);

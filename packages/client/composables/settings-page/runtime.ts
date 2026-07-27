@@ -3,7 +3,7 @@ import {
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
 } from "@bao/shared/constants/ai-provider";
-import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/constants/branding";
+import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/tokens/branding";
 import { DEFAULT_JOB_TAXONOMY_SETTINGS } from "@bao/shared/constants/jobs-taxonomy";
 import { type AppLanguageCode, DEFAULT_APP_LANGUAGE } from "@bao/shared/constants/settings";
 import { brandSettingsSchema } from "@bao/shared/schemas/settings.schema";

@@ -24,6 +24,7 @@ import {
   BADGE_SUCCESS_SM_CLASS,
   BODY_TEXT_SM_CLASS,
   BODY_TEXT_XS_CLASS,
+  CARD_BODY_OVERLAY_CLASS,
   CARD_TITLE_LG_CLASS,
   ICON_DECORATIVE_STROKE_WIDTH,
   ICON_SIZE_CHEVRON_CLASS,
@@ -70,7 +71,8 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="card-body relative z-10">
+  <UiGlassCard :to="props.to" :link-aria-label="props.linkAriaLabel" :stagger-index="props.staggerIndex">
+    <div :class="CARD_BODY_OVERLAY_CLASS">
     <div :class="['flex items-start justify-between', ROW_GAP_XS_CLASS]">
       <h3 :class="CARD_TITLE_LG_CLASS">{{ props.job.title }}</h3>
       <JobMatchScore v-if="typeof props.job.matchScore === 'number'" :score="props.job.matchScore" compact />
@@ -131,6 +133,7 @@ const { t } = useI18n();
           </button>
         </div>
       </div>
-    </template>
-  </div>
+      </template>
+    </div>
+  </UiGlassCard>
 </template>

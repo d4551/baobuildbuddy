@@ -13,7 +13,7 @@ import {
   API_MESSAGE_COVER_LETTER_GENERATED,
   API_MESSAGE_RESUME_ANALYSIS_COMPLETE,
 } from "@bao/shared/constants/api-messages";
-import { resolveBrandSettings } from "@bao/shared/constants/branding";
+import { resolveBrandSettings } from "@bao/shared/tokens/branding";
 import {
   HTTP_STATUS_INTERNAL_SERVER_ERROR,
   HTTP_STATUS_NOT_FOUND,

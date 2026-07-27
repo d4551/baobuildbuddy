@@ -19,7 +19,7 @@ import {
   normalizeJobExperienceLevel,
 } from "~/composables/api-normalizer-shared";
 
-const normalizeSalary = (value: unknown): Job["salary"] | undefined => {
+const normalizeSalary = <T>(value: T): Job["salary"] | undefined => {
   if (typeof value === "string") {
     return value;
   }
@@ -49,7 +49,7 @@ const normalizeSalary = (value: unknown): Job["salary"] | undefined => {
   return salary;
 };
 
-export const toJob = (value: unknown): Job | null => {
+export const toJob = <T>(value: T): Job | null => {
   if (!isRecord(value)) return null;
   const id = asString(value.id);
   const title = asString(value.title);
@@ -69,7 +69,7 @@ export const toJob = (value: unknown): Job | null => {
     requirements: asStringArray(value.requirements),
     technologies: asStringArray(value.technologies),
     experienceLevel: normalizeJobExperienceLevel(value.experienceLevel),
-    type: normalizeJobType(value.type),
+    type: normalizeJobType(asString(value.type)),
     postedDate: asString(value.postedDate) ?? new Date().toISOString(),
     url: asString(value.url),
     source: asString(value.source),

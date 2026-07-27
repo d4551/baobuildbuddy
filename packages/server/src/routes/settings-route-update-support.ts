@@ -4,7 +4,7 @@ import {
   mergeBrandSettings,
   normalizeAppDataTheme,
   resolveBrandSettings,
-} from "@bao/shared/constants/branding";
+} from "@bao/shared/tokens/branding";
 import {
   automationSettingsSchema,
   brandSettingsPatchSchema,

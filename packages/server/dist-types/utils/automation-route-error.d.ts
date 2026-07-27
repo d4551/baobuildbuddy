@@ -17,4 +17,4 @@ export declare function toRouteError(code: RpaRunErrorCode, message: string, det
  * Maps automation service errors to HTTP status and error envelope.
  * Single source of truth for automation route error handling.
  */
-export declare function mapAutomationRouteError(error: unknown): AutomationRouteErrorResult;
+export declare function mapAutomationRouteError(error: Error | string): AutomationRouteErrorResult;

@@ -16,6 +16,7 @@
     "./types/*": "./src/types/*.ts",
     "./schemas/*": "./src/schemas/*.ts",
     "./constants/*": "./src/constants/*.ts",
+    "./tokens/*": "./src/tokens/*.ts",
     "./utils/*": "./src/utils/*.ts"
   },
   "scripts": {

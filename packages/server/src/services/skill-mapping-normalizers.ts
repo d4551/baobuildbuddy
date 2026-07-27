@@ -18,7 +18,7 @@ type DemandLevel = SkillMapping["demandLevel"];
 const isSkillCategory = (value: string | null): value is SkillCategory =>
   typeof value === "string" && SKILL_CATEGORY_IDS.some((categoryId) => categoryId === value);
 
-const isDemandLevel = (value: unknown): value is DemandLevel =>
+const isDemandLevel = <T>(value: T): value is T & DemandLevel =>
   typeof value === "string" && SKILL_DEMAND_LEVEL_IDS.some((levelId) => levelId === value);
 
 const isEvidenceType = (value: JsonValue | undefined): value is SkillEvidence["type"] =>
@@ -33,7 +33,7 @@ const isEvidenceStatus = (
 export const normalizeSkillCategory = (value: string | null): SkillCategory =>
   isSkillCategory(value) ? value : "technical";
 
-export const normalizeDemandLevel = (value: unknown): DemandLevel =>
+export const normalizeDemandLevel = <T>(value: T): DemandLevel =>
   isDemandLevel(value) ? value : "medium";
 
 const normalizeEvidenceType = (value: JsonValue | undefined): SkillEvidence["type"] =>

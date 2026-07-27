@@ -1,6 +1,6 @@
 import z from "zod";
 import { AI_PROVIDER_DEFAULT, AI_PROVIDER_ID_LIST, DEFAULT_AI_ROUTING } from "../constants/ai";
-import { DEFAULT_BRAND_SETTINGS, normalizeAppDataTheme, THEME_NAMES } from "../constants/branding";
+import { DEFAULT_BRAND_SETTINGS, normalizeAppDataTheme, THEME_NAMES } from "../tokens/branding";
 import { MAX_PORT, MIN_PORT } from "../constants/ports";
 import {
   SCHEMA_DEFAULT_AUTOMATION_TIMEOUT_SECONDS,

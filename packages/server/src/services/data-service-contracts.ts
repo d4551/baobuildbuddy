@@ -1,3 +1,5 @@
+import type { JsonValue } from "@bao/shared/utils/json";
+
 export const DATA_EXPORT_VERSION = "1.0" as const;
 
 /**
@@ -10,18 +12,18 @@ export interface BaoExportData {
   /** Literal so the export payload matches the declared response contract. */
   version: typeof DATA_EXPORT_VERSION;
   exportedAt: string;
-  profile: unknown;
-  settings: unknown;
-  resumes: unknown[];
-  coverLetters: unknown[];
-  portfolio: unknown;
-  portfolioProjects: unknown[];
-  interviewSessions: unknown[];
-  gamification: unknown;
-  skillMappings: unknown[];
-  savedJobs: unknown[];
-  applications: unknown[];
-  chatHistory: unknown[];
+  profile: JsonValue;
+  settings: JsonValue;
+  resumes: JsonValue[];
+  coverLetters: JsonValue[];
+  portfolio: JsonValue;
+  portfolioProjects: JsonValue[];
+  interviewSessions: JsonValue[];
+  gamification: JsonValue;
+  skillMappings: JsonValue[];
+  savedJobs: JsonValue[];
+  applications: JsonValue[];
+  chatHistory: JsonValue[];
 }
 
 export interface ImportResult {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { THEME_NAMES } from "@bao/shared/constants/branding";
+import { THEME_NAMES } from "@bao/shared/tokens/branding";
 import { APP_ROUTES } from "@bao/shared/constants/routes";
 import { computed, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";

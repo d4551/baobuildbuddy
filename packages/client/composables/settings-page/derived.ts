@@ -1,4 +1,4 @@
-import { resolveBrandSettings } from "@bao/shared/constants/branding";
+import { resolveBrandSettings } from "@bao/shared/tokens/branding";
 import {
   brandContentSettingsSchema,
   brandThemePaletteSchema,

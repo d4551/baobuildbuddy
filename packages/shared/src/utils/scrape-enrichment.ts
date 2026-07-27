@@ -1,5 +1,6 @@
 import { AI_PROVIDER_IDS, type AIProviderType } from "../types/ai";
 import type { ScrapePersonaEnrichment } from "../types/jobs";
+import type { JsonValue } from "./json";
 import { asRecord, asString, asStringArray } from "./type-guards";
 
 const SCRAPE_ENRICHMENT_LIST_LIMIT = 4;
@@ -8,10 +9,10 @@ const isAIProviderType = (value: string): value is AIProviderType =>
   AI_PROVIDER_IDS.some((provider) => provider === value);
 
 /**
- * Normalizes unknown scrape-enrichment payloads into the shared contract.
+ * Normalizes scrape-enrichment payloads into the shared contract.
  */
 export function normalizeScrapePersonaEnrichment(
-  value: unknown,
+  value: JsonValue | null | undefined,
 ): ScrapePersonaEnrichment | undefined {
   const record = asRecord(value);
   if (!record) {

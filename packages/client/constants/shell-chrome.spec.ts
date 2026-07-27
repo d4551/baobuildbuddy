@@ -23,7 +23,9 @@ describe("shell chrome SSOT (dock/FAB/touch)", () => {
 
   it("keeps floating chat stack viewport-bounded on small screens", () => {
     expect(SHELL_FLOATING_CHAT_STACK_CLASS.includes("inset-x-4")).toBe(true);
-    expect(SHELL_FLOATING_CHAT_STACK_CLASS.includes("100vw")).toBe(true);
+    expect(SHELL_FLOATING_CHAT_STACK_CLASS.includes("fixed")).toBe(true);
+    // Width is fully determined by the left/right insets — no arbitrary viewport calc.
+    expect(SHELL_FLOATING_CHAT_STACK_CLASS.includes("100vw")).toBe(false);
   });
 
   it("keeps floating panel width inside the stack (no max-w-md hang)", () => {

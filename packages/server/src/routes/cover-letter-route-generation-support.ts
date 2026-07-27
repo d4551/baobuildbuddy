@@ -1,6 +1,6 @@
 import { API_ERROR_COVER_LETTER_INCOMPLETE_CONTENT } from "@bao/shared/constants/api-errors";
 import { DEFAULT_UNSPECIFIED_LABEL } from "@bao/shared/constants/default-labels";
-import { safeParseJson } from "@bao/shared/utils/json";
+import { type JsonObject, safeParseJson } from "@bao/shared/utils/json";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { resumes } from "../db/schema/resumes";
@@ -42,8 +42,8 @@ const REASONING_SECTION_PATTERN =
   /(?:^|\n)\s*(?:[*-]\s*)?[*]?(introduction|body|conclusion)[*]?\s*:\s*([\s\S]*?)(?=\n\s*(?:[*-]\s*)?[*]?(?:introduction|body|conclusion)[*]?\s*:|$)/giu;
 const SECTION_REASONING_TAIL_PATTERN = /\n{2,}\d+\.\s[\s\S]*$/u;
 const SECTION_LEADING_BULLET_PATTERN = /^\*\s+/u;
-const SECTION_LEADING_QUOTE_PATTERN = /^(?:\\?["“”']+)+/u;
-const SECTION_TRAILING_QUOTE_PATTERN = /(?:\\?["“”']+)+$/u;
+const SECTION_LEADING_QUOTE_PATTERN = /^(?:\\?[""']+)+/u;
+const SECTION_TRAILING_QUOTE_PATTERN = /(?:\\?[""']+)+$/u;
 const SECTION_TRAILING_ESCAPE_PATTERN = /\\+$/u;
 const SECTION_TRAILING_EDITORIAL_PATTERN =
   /\s+\((?:good|great|strong|clear|works|covers|aligned|solid|meets)[^)]*\)\.?$/iu;
@@ -69,13 +69,12 @@ const decodeJsonStringLiteral = (value: string): string | null => {
   return typeof decoded === "string" ? decoded : null;
 };
 
-const isJsonRecord = (value: unknown): value is Record<string, unknown> =>
+const isJsonRecord = <T>(value: T): value is T & JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const toNonEmptyString = (value: unknown): string =>
-  typeof value === "string" ? value.trim() : "";
+const toNonEmptyString = <T>(value: T): string => (typeof value === "string" ? value.trim() : "");
 
-const toStringArray = (value: unknown): string[] =>
+const toStringArray = <T>(value: T): string[] =>
   Array.isArray(value)
     ? value
         .filter((entry): entry is string => typeof entry === "string")
@@ -83,8 +82,8 @@ const toStringArray = (value: unknown): string[] =>
         .filter((entry) => entry.length > 0)
     : [];
 
-const parseJsonLikeSegments = (content: string): Record<string, unknown> => {
-  const parsedSegments: Record<string, unknown> = {};
+const parseJsonLikeSegments = (content: string): JsonObject => {
+  const parsedSegments: JsonObject = {};
 
   for (const match of content.matchAll(JSON_SEGMENT_PATTERN)) {
     const [, key, rawValue] = match;
@@ -97,8 +96,8 @@ const parseJsonLikeSegments = (content: string): Record<string, unknown> => {
   return parsedSegments;
 };
 
-const parseJsonLikeLineSegments = (content: string): Record<string, unknown> => {
-  const parsedSegments: Record<string, unknown> = {};
+const parseJsonLikeLineSegments = (content: string): JsonObject => {
+  const parsedSegments: JsonObject = {};
 
   for (const line of content.split("\n")) {
     const match = line.match(JSON_LINE_SEGMENT_PATTERN);
@@ -110,7 +109,7 @@ const parseJsonLikeLineSegments = (content: string): Record<string, unknown> => 
 
     const normalizedValue = rawValue
       .trim()
-      .replaceAll(/^["“”']+|["“”',}]+$/gu, "")
+      .replaceAll(/^[""']+|[""',}]+$/gu, "")
       .trim();
     if (normalizedValue.length > 0) {
       parsedSegments[key.toLowerCase()] = normalizedValue;
@@ -120,15 +119,15 @@ const parseJsonLikeLineSegments = (content: string): Record<string, unknown> => 
   return parsedSegments;
 };
 
-const parseReasoningSegments = (content: string): Record<string, unknown> => {
-  const parsedSegments: Record<string, unknown> = {};
+const parseReasoningSegments = (content: string): JsonObject => {
+  const parsedSegments: JsonObject = {};
   const normalizedContent = content.replaceAll("\r\n", "\n");
 
   for (const match of normalizedContent.matchAll(REASONING_SECTION_PATTERN)) {
     const sectionName = match[1]?.toLowerCase();
     const sectionValue = match[2]
       ?.trim()
-      .replaceAll(/^["“”']+|["“”']+$/gu, "")
+      .replaceAll(/^[""']+|[""']+$/gu, "")
       .trim();
     if (sectionName && sectionValue) {
       parsedSegments[sectionName] = sectionValue;
@@ -149,7 +148,7 @@ const cleanGeneratedCoverLetterSegment = (value: string): string =>
     .replace(SECTION_TRAILING_ESCAPE_PATTERN, "")
     .trim();
 
-const parseGeneratedCoverLetterContent = (content: string): Record<string, unknown> => {
+const parseGeneratedCoverLetterContent = (content: string): JsonObject => {
   const normalizedContent = stripMarkdownCodeFence(content);
   const parsed = safeParseJson(normalizedContent);
   if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
@@ -207,7 +206,7 @@ const parseGeneratedCoverLetterContent = (content: string): Record<string, unkno
   };
 };
 
-const readCoverLetterSegment = (value: unknown): string => {
+const readCoverLetterSegment = <T>(value: T): string => {
   if (typeof value === "string") {
     return cleanGeneratedCoverLetterSegment(value);
   }
@@ -219,14 +218,12 @@ const readCoverLetterSegment = (value: unknown): string => {
   return "";
 };
 
-const readExperienceHighlight = (value: unknown): string => {
+const readExperienceHighlight = <T>(value: T): string => {
   if (!Array.isArray(value)) {
     return "";
   }
 
-  const firstExperience = value.find((entry): entry is Record<string, unknown> =>
-    isJsonRecord(entry),
-  );
+  const firstExperience = value.find((entry): entry is JsonObject => isJsonRecord(entry));
   if (!firstExperience) {
     return "";
   }
@@ -238,7 +235,7 @@ const readExperienceHighlight = (value: unknown): string => {
   return [roleLabel, description].filter((entry) => entry.length > 0).join(", ");
 };
 
-const readResumeSkills = (value: unknown): string[] => {
+const readResumeSkills = <T>(value: T): string[] => {
   if (Array.isArray(value)) {
     return toStringArray(value);
   }

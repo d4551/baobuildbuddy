@@ -2,9 +2,10 @@ import type {
   CompanyBoardATSType,
   JobProviderSettings,
 } from "@bao/shared/types/settings-contracts";
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
 import { generateId } from "@bao/shared/utils/validation";
 
-export interface ATSJob extends Record<string, unknown> {
+export interface ATSJob {
   id?: string;
   title?: string;
   text?: string;
@@ -24,6 +25,7 @@ export interface ATSJob extends Record<string, unknown> {
   created_at?: string;
   createdAt?: number | string;
   releasedDate?: string;
+  [key: string]: JsonValue | undefined;
 }
 
 type ATSResponseFields = {
@@ -34,14 +36,14 @@ type ATSResponseFields = {
   data?: ATSJob[];
 };
 
-export type ATSResponse = ATSJob[] | (ATSResponseFields & Record<string, unknown>);
+export type ATSResponse = ATSJob[] | (ATSResponseFields & JsonObject);
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
+const isRecord = <T>(value: T): value is T & JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const isAtsJob = (value: unknown): value is ATSJob => isRecord(value);
+const isAtsJob = <T>(value: T): value is T & ATSJob => isRecord(value);
 
-export const isAtsResponse = (value: unknown): value is ATSResponse =>
+export const isAtsResponse = <T>(value: T): value is T & ATSResponse =>
   (Array.isArray(value) && value.every(isAtsJob)) || isRecord(value);
 
 export const resolveLocation = (location: ATSJob["location"]): string => {

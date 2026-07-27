@@ -55,11 +55,18 @@ export interface ResumeSkillGroupOptions {
   trailingGap: number;
 }
 
-export interface CoverLetterContentSections {
+/**
+ * Declared as a type alias rather than an interface on purpose: only aliases get
+ * an implicit index signature, so this stays assignable to the
+ * `Record<string, string | ReadonlyArray<string> | undefined>` input that
+ * `toCoverLetterParagraphs` accepts. As an interface it failed that assignment
+ * and the mismatch surfaced at every export call site.
+ */
+export type CoverLetterContentSections = {
   introduction?: string;
   body?: string;
   conclusion?: string;
-}
+};
 
 export type CoverLetterContent = string | CoverLetterContentSections;
 

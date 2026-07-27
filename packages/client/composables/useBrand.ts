@@ -1,4 +1,4 @@
-import { resolveBrandSettings, THEME_NAMES } from "@bao/shared/constants/branding";
+import { resolveBrandSettings, THEME_NAMES } from "@bao/shared/tokens/branding";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import type {
   AppSettings,

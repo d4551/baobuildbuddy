@@ -2,7 +2,7 @@ import {
   type AppDataTheme,
   normalizeAppDataTheme,
   THEME_NAMES,
-} from "@bao/shared/constants/branding";
+} from "@bao/shared/tokens/branding";
 import { STATE_KEYS } from "@bao/shared/constants/state-keys";
 import { SECONDS_PER_DAY } from "@bao/shared/constants/time";
 import { readonly } from "vue";

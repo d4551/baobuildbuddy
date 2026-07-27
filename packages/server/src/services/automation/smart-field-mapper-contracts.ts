@@ -8,6 +8,7 @@ import {
   SCHEMA_MAX_LENGTH_URL,
 } from "@bao/shared/constants/schema-limits";
 import type { AIResponse } from "@bao/shared/types/ai";
+import type { JsonObject } from "@bao/shared/utils/json";
 import { z } from "zod";
 
 export interface FieldMapperAIClient {
@@ -18,8 +19,8 @@ export interface FieldMapperAIClient {
 }
 
 export interface SmartFieldAnalysisContext {
-  readonly resume: Record<string, unknown>;
-  readonly coverLetter?: Record<string, unknown> | null;
+  readonly resume: JsonObject;
+  readonly coverLetter?: JsonObject | null;
   readonly existingAnswers?: Record<string, string>;
   readonly jobContext?: string;
   readonly studioContext?: string;

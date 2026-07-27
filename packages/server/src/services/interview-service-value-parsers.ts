@@ -1,19 +1,19 @@
 import { DECIMAL_RADIX } from "@bao/shared/constants/client-config";
-import { type JsonValue, safeParseJson } from "@bao/shared/utils/json";
+import { type JsonObject, type JsonValue, safeParseJson } from "@bao/shared/utils/json";
 
 const JSON_CODE_FENCE_PATTERN = /```(?:json)?\s*([\s\S]*?)```/i;
 const JSON_ARRAY_PATTERN = /\[[\s\S]*\]/;
 const JSON_OBJECT_PATTERN = /\{[\s\S]*\}/;
 
-export const toPersistedRecord = (value: object): Record<string, unknown> => {
-  const record: Record<string, unknown> = {};
+export const toPersistedRecord = (value: object): JsonObject => {
+  const record: JsonObject = {};
   for (const [key, entry] of Object.entries(value)) {
-    record[key] = entry;
+    record[key] = entry as JsonValue;
   }
   return record;
 };
 
-export function parseNumber(value: unknown, fallback: number, min: number, max: number): number {
+export function parseNumber<T>(value: T, fallback: number, min: number, max: number): number {
   if (typeof value === "number" && Number.isFinite(value)) {
     return Math.max(min, Math.min(Math.floor(value), max));
   }
@@ -28,7 +28,7 @@ export function parseNumber(value: unknown, fallback: number, min: number, max: 
   return fallback;
 }
 
-export function parseBoolean(value: unknown, fallback: boolean): boolean {
+export function parseBoolean<T>(value: T, fallback: boolean): boolean {
   if (typeof value === "boolean") {
     return value;
   }
@@ -43,11 +43,11 @@ export function parseBoolean(value: unknown, fallback: boolean): boolean {
   return fallback;
 }
 
-export function parseString(value: unknown, fallback: string): string {
+export function parseString<T>(value: T, fallback: string): string {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
 
-export function parseStringArray(value: unknown): string[] {
+export function parseStringArray<T>(value: T): string[] {
   if (!Array.isArray(value)) {
     return [];
   }

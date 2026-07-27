@@ -1,5 +1,6 @@
 import type { CompanyBoardATSType, JobProviderSettings } from "@bao/shared/types/settings-contracts";
-export interface ATSJob extends Record<string, unknown> {
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+export interface ATSJob {
     id?: string;
     title?: string;
     text?: string;
@@ -26,6 +27,7 @@ export interface ATSJob extends Record<string, unknown> {
     created_at?: string;
     createdAt?: number | string;
     releasedDate?: string;
+    [key: string]: JsonValue | undefined;
 }
 type ATSResponseFields = {
     jobs?: ATSJob[];
@@ -34,8 +36,8 @@ type ATSResponseFields = {
     results?: ATSJob[];
     data?: ATSJob[];
 };
-export type ATSResponse = ATSJob[] | (ATSResponseFields & Record<string, unknown>);
-export declare const isAtsResponse: (value: unknown) => value is ATSResponse;
+export type ATSResponse = ATSJob[] | (ATSResponseFields & JsonObject);
+export declare const isAtsResponse: <T>(value: T) => value is T & ATSResponse;
 export declare const resolveLocation: (location: ATSJob["location"]) => string;
 export declare const toISODate: (value?: string | number) => string;
 export declare const resolveHashFragment: (job: ATSJob) => string;

@@ -6,7 +6,7 @@ export const runWithErrorHandler = async (
 ): Promise<void> => {
   await operation().then(
     () => undefined,
-    (error: unknown) => {
+    (error: Error | string) => {
       onError(toErrorMessage(error));
     },
   );

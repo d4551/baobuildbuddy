@@ -1,4 +1,4 @@
-import { APP_BRAND } from "@bao/shared/constants/branding";
+import { APP_BRAND } from "@bao/shared/tokens/branding";
 import {
   API_ENDPOINT_PREFIX,
   API_ENDPOINTS,

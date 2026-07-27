@@ -3,7 +3,7 @@
  */
 
 import { SCHEMA_MAX_ITEMS_XXLARGE } from "@bao/shared/constants/schema-limits";
-import { safeParseJson } from "@bao/shared/utils/json";
+import { type JsonObject, type JsonValue, safeParseJson } from "@bao/shared/utils/json";
 import { JOB_AGGREGATOR_USER_AGENT, type JobProvider, type RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
@@ -24,17 +24,17 @@ interface LeverJob {
   workplaceType?: string;
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
+const isRecord = <T>(value: T): value is T & JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const isLeverCategories = (value: unknown): value is LeverJob["categories"] =>
+const isLeverCategories = <T>(value: T): value is T & LeverJob["categories"] =>
   isRecord(value) &&
   (value.commitment === undefined || typeof value.commitment === "string") &&
   (value.department === undefined || typeof value.department === "string") &&
   (value.team === undefined || typeof value.team === "string") &&
   (value.location === undefined || typeof value.location === "string");
 
-const isLeverJob = (value: unknown): value is LeverJob => {
+const isLeverJob = <T>(value: T): value is T & LeverJob => {
   if (!(isRecord(value) && isLeverCategories(value.categories))) {
     return false;
   }
@@ -51,13 +51,13 @@ const isLeverJob = (value: unknown): value is LeverJob => {
   );
 };
 
-const parseLeverJobs = (value: unknown): LeverJob[] => {
+const parseLeverJobs = <T>(value: T): LeverJob[] => {
   if (!Array.isArray(value)) {
     return [];
   }
 
   const jobs: LeverJob[] = [];
-  for (const item of value) {
+  for (const item of value as JsonValue[]) {
     if (!isLeverJob(item)) {
       return [];
     }

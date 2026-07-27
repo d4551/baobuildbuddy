@@ -33,7 +33,7 @@ export declare const buildSettingsResponse: (row: SettingsRow) => Promise<{
     language: "en-US" | "es-ES" | "fr-FR" | "ja-JP" | null;
     notifications: NotificationPreferences | null;
     preferredModel: string | null;
-    theme: import("@bao/shared/constants/branding").AppDataTheme;
+    theme: import("@bao/shared/tokens/branding").AppDataTheme;
     brandSettings: import("@bao/shared/types/settings-contracts").BrandSettings;
     geminiApiKey: string | null;
     openaiApiKey: string | null;

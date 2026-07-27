@@ -22,7 +22,7 @@ const TEST_ANALYSIS_CONTEXT = {
     },
   },
   existingAnswers: {},
-} as const;
+};
 
 const createFetchMock = (body: string, status: number): typeof fetch =>
   Object.assign(

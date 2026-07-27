@@ -7,7 +7,14 @@ import type { AIProviderType } from "./ai";
 /**
  * AI-generated hiring and interview context derived from a scraped job or studio.
  */
-export interface ScrapePersonaEnrichment {
+/**
+ * Declared as a type alias rather than an interface: this payload is persisted
+ * and re-read as JSON, so it must stay assignable to `JsonValue` when handed
+ * back to `normalizeScrapePersonaEnrichment`. Only type aliases get an implicit
+ * index signature, so as an interface it failed that assignment at every
+ * round-trip call site.
+ */
+export type ScrapePersonaEnrichment = {
   summary: string;
   hiringSignals: string[];
   interviewFocusAreas: string[];
@@ -15,7 +22,7 @@ export interface ScrapePersonaEnrichment {
   provider?: AIProviderType;
   model?: string;
   updatedAt?: string;
-}
+};
 
 /**
  * Summary of AI enrichment completed during one scrape operation.

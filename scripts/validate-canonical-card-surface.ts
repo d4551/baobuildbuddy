@@ -38,6 +38,9 @@ const STATIC_CLASS_ATTRIBUTE_PATTERN = /\bclass="([^"]*)"/gu;
 /** Utility families that turn a bare `card` into a self-styled surface. */
 const SURFACE_UTILITY_PATTERN = /\b(?:bg-base-\d+|card-border|card-dash|bg-base-100\/\d+)\b/u;
 
+/** Splits a class attribute value into individual class tokens. */
+const CLASS_TOKEN_SEPARATOR_PATTERN = /\s+/u;
+
 /**
  * Reports whether a class list contains the standalone `card` token.
  *
@@ -45,7 +48,7 @@ const SURFACE_UTILITY_PATTERN = /\b(?:bg-base-\d+|card-border|card-dash|bg-base-
  * must not count — only the surface token itself does.
  */
 const hasStandaloneCardToken = (classList: string): boolean =>
-  classList.split(/\s+/u).includes("card");
+  classList.split(CLASS_TOKEN_SEPARATOR_PATTERN).includes("card");
 
 /**
  * Flags hand-composed card surfaces in one Vue file.

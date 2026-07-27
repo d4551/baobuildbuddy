@@ -14,6 +14,7 @@ import {
   DOCX_COVER_LETTER_FONT_BODY_PT,
   DOCX_COVER_LETTER_FONT_HEADER_PT,
 } from "./docx-export-contracts";
+import type { CoverLetterContent } from "./export-service-contracts";
 
 function buildCoverLetterHeader(
   userProfile: CoverLetterUserProfile,
@@ -105,7 +106,7 @@ function buildCoverLetterRecipientBlock(
 }
 
 function buildCoverLetterBodyParagraphs(
-  content: unknown,
+  content: CoverLetterContent,
   theme: CoverLetterDocxTheme,
 ): Paragraph[] {
   return toCoverLetterParagraphs(content).map(

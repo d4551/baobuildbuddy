@@ -15,7 +15,7 @@ import type {
   GenerateOptions,
 } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
-import { safeParseJson } from "@bao/shared/utils/json";
+import { type JsonObject, safeParseJson } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 import OpenAI from "openai";
 import {
@@ -43,10 +43,10 @@ const buildLocalProviderMessages = (
   return messages;
 };
 
-const isJsonRecord = (value: unknown): value is Record<string, unknown> =>
+const isJsonRecord = <T>(value: T): value is T & JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const readNonEmptyString = (value: unknown): string | null =>
+const readNonEmptyString = <T>(value: T): string | null =>
   typeof value === "string" && value.trim().length > 0 ? value : null;
 
 const readMessageReasoning = (completion: OpenAI.Chat.ChatCompletion): string => {

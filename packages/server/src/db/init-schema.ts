@@ -1,5 +1,5 @@
 import { DEFAULT_AI_ROUTING } from "@bao/shared/constants/ai-provider";
-import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/constants/branding";
+import { DEFAULT_BRAND_SETTINGS } from "@bao/shared/tokens/branding";
 import { COVER_LETTER_DEFAULT_TEMPLATE } from "@bao/shared/constants/cover-letter";
 import {
   RESUME_DEFAULT_NAME,

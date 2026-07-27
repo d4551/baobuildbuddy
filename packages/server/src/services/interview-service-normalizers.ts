@@ -28,40 +28,30 @@ const questionTypePattern = new Set<string>([
 
 const difficultyPattern = new Set<string>(["easy", "medium", "hard"]);
 
-export function normalizeQuestionType(
-  value: unknown,
+const isQuestionType = (value: string): value is InterviewQuestion["type"] =>
+  questionTypePattern.has(value);
+
+const isDifficulty = (value: string): value is InterviewQuestion["difficulty"] =>
+  difficultyPattern.has(value);
+
+export function normalizeQuestionType<T>(
+  value: T,
   fallback: InterviewQuestion["type"],
 ): InterviewQuestion["type"] {
-  if (typeof value !== "string" || !questionTypePattern.has(value)) {
-    return fallback;
-  }
-
-  if (
-    value === "behavioral" ||
-    value === "technical" ||
-    value === "studio-specific" ||
-    value === "intro" ||
-    value === "closing"
-  ) {
+  if (typeof value === "string" && isQuestionType(value)) {
     return value;
   }
-
   return fallback;
 }
 
-export function normalizeDifficulty(value: unknown): InterviewQuestion["difficulty"] {
-  if (typeof value !== "string" || !difficultyPattern.has(value)) {
-    return "medium";
-  }
-  if (value === "easy" || value === "medium" || value === "hard") {
+export function normalizeDifficulty<T>(value: T): InterviewQuestion["difficulty"] {
+  if (typeof value === "string" && isDifficulty(value)) {
     return value;
   }
   return "medium";
 }
 
-export function normalizeQuestions(raw: unknown): InterviewQuestion[] {
-  // `Array.isArray` on a wide input narrows to `any[]`, which then spreads
-  // `any` through every member access below; asJsonArray keeps elements typed.
+export function normalizeQuestions<T>(raw: T): InterviewQuestion[] {
   const entries = asJsonArray(raw);
   if (!entries) {
     return [];
@@ -108,7 +98,7 @@ export function normalizeScore(value: number): number {
   return Math.max(0, Math.min(PERCENT_MAX, Math.round(value)));
 }
 
-export function normalizeAiAnalysisScore(scoreCandidate: unknown): number {
+export function normalizeAiAnalysisScore<T>(scoreCandidate: T): number {
   if (typeof scoreCandidate === "number" && Number.isFinite(scoreCandidate)) {
     return normalizeScore(Math.round(scoreCandidate));
   }
@@ -150,17 +140,13 @@ const toPersistedAiAnalysis = (
     feedback: typeof raw.feedback === "string" ? raw.feedback : "",
     strengths: parseStringArray(raw.strengths),
     improvements: parseStringArray(raw.improvements),
-    // Persisted rows predate provenance tracking, so an absent or unrecognised
-    // marker resolves to "unknown" rather than claiming AI.
     source: resolveInterviewAnalysisSource(raw.source),
     ...(typeof raw.provider === "string" ? { provider: raw.provider } : {}),
     ...(typeof raw.model === "string" ? { model: raw.model } : {}),
   };
 };
 
-export function normalizeResponses(raw: unknown): InterviewResponse[] {
-  // `Array.isArray` on a wide input narrows to `any[]`, which then spreads
-  // `any` through every member access below; asJsonArray keeps elements typed.
+export function normalizeResponses<T>(raw: T): InterviewResponse[] {
   const entries = asJsonArray(raw);
   if (!entries) {
     return [];
@@ -182,7 +168,7 @@ export function normalizeResponses(raw: unknown): InterviewResponse[] {
   return parsed;
 }
 
-export function normalizeFinalAnalysis(raw: unknown): InterviewAnalysis | null {
+export function normalizeFinalAnalysis<T>(raw: T): InterviewAnalysis | null {
   if (!isRecord(raw)) {
     return null;
   }
@@ -197,16 +183,10 @@ export function normalizeFinalAnalysis(raw: unknown): InterviewAnalysis | null {
     improvements: parseStringArray(raw.improvements),
     recommendations: parseStringArray(raw.recommendations),
     ...(feedback ? { feedback } : {}),
-    // Provenance is stamped at generation time and must survive the round trip,
-    // otherwise a reloaded session silently loses its AI-vs-heuristic attribution.
     ...normalizePersistedProvenance(raw),
   };
 }
 
-/**
- * Restores session-level analysis provenance from a persisted row. Rows written
- * before provenance tracking simply carry none, and stay unattributed.
- */
 function normalizePersistedProvenance(
   raw: JsonObject,
 ): Pick<InterviewAnalysis, "analysisSource" | "aiAverageScore" | "provenanceCounts"> {
@@ -234,14 +214,15 @@ function normalizePersistedProvenance(
   };
 }
 
-export function normalizeInterviewSessionStatus(value: unknown): InterviewSession["status"] {
-  if (
-    value === "preparing" ||
-    value === "active" ||
-    value === "paused" ||
-    value === "completed" ||
-    value === "cancelled"
-  ) {
+const isSessionStatus = (value: string): value is InterviewSession["status"] =>
+  value === "preparing" ||
+  value === "active" ||
+  value === "paused" ||
+  value === "completed" ||
+  value === "cancelled";
+
+export function normalizeInterviewSessionStatus<T>(value: T): InterviewSession["status"] {
+  if (typeof value === "string" && isSessionStatus(value)) {
     return value;
   }
   return "active";

@@ -4,7 +4,7 @@ import {
   LOCAL_AI_DEFAULT_ENDPOINT,
   LOCAL_AI_DEFAULT_MODEL,
 } from "@bao/shared/constants/ai-provider";
-import { DEFAULT_BRAND_SETTINGS, THEME_NAMES } from "@bao/shared/constants/branding";
+import { DEFAULT_BRAND_SETTINGS, THEME_NAMES } from "@bao/shared/tokens/branding";
 import type { AIRouting } from "@bao/shared/types/ai";
 import type {
   AutomationSettings,

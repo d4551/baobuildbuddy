@@ -1,6 +1,6 @@
 import { AI_PROVIDER_TEST_STRATEGY_BY_ID } from "@bao/shared/constants/ai-provider";
 import { API_ERROR_UNKNOWN, API_ERROR_UNKNOWN_PROVIDER } from "@bao/shared/constants/api-errors";
-import { normalizeAppDataTheme, resolveBrandSettings } from "@bao/shared/constants/branding";
+import { normalizeAppDataTheme, resolveBrandSettings } from "@bao/shared/tokens/branding";
 import { resolveAppLanguageCode } from "@bao/shared/constants/settings";
 import type { AIProviderType } from "@bao/shared/types/ai";
 import {

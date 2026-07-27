@@ -1,14 +1,15 @@
 import { COUNT_THREE } from "@bao/shared/constants/numeric";
+import type { JsonObject } from "@bao/shared/utils/json";
 import type { SmartFieldAnalysisContext } from "./smart-field-mapper-contracts";
 
 const FIELD_CONTEXT_ITEM_LIMIT = 6;
 const FIELD_CONTEXT_TEXT_LIMIT = 280;
 const FIELD_CONTEXT_SECTION_LIMIT = 4;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
+const isRecord = <T>(value: T): value is T & JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const getRecord = (value: unknown, key: string): Record<string, unknown> | null => {
+const getRecord = <T>(value: T, key: string): JsonObject | null => {
   if (!isRecord(value)) {
     return null;
   }
@@ -16,15 +17,14 @@ const getRecord = (value: unknown, key: string): Record<string, unknown> | null 
   return isRecord(entry) ? entry : null;
 };
 
-const getTrimmedString = (value: unknown): string =>
-  typeof value === "string" ? value.trim() : "";
+const getTrimmedString = <T>(value: T): string => (typeof value === "string" ? value.trim() : "");
 
 const truncateText = (value: string): string =>
   value.length > FIELD_CONTEXT_TEXT_LIMIT
     ? `${value.slice(0, FIELD_CONTEXT_TEXT_LIMIT)}...`
     : value;
 
-const uniqueNonEmptyStrings = (value: unknown): string[] => {
+const uniqueNonEmptyStrings = <T>(value: T): string[] => {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -39,7 +39,7 @@ const uniqueNonEmptyStrings = (value: unknown): string[] => {
   );
 };
 
-const getResumeHighlights = (resume: Record<string, unknown>): string[] => {
+const getResumeHighlights = (resume: JsonObject): string[] => {
   const experience = Array.isArray(resume.experience) ? resume.experience : [];
   const highlights: string[] = [];
 
@@ -61,7 +61,7 @@ const getResumeHighlights = (resume: Record<string, unknown>): string[] => {
   return highlights;
 };
 
-const getProjectHighlights = (resume: Record<string, unknown>): string[] => {
+const getProjectHighlights = (resume: JsonObject): string[] => {
   const projects = Array.isArray(resume.projects) ? resume.projects : [];
   const highlights: string[] = [];
 

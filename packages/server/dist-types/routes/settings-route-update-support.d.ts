@@ -1,4 +1,4 @@
-import { type AppDataTheme } from "@bao/shared/constants/branding";
+import { type AppDataTheme } from "@bao/shared/tokens/branding";
 import { type AIProviderType, type AIRouting } from "@bao/shared/types/ai";
 import type { AutomationSettings, BrandSettingsPatch, EmailTransportSettings, NotificationPreferences } from "@bao/shared/types/settings-contracts";
 import type { settings as settingsTable } from "../db/schema/settings";

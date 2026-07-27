@@ -1,4 +1,4 @@
-import type { AppDataTheme } from "@bao/shared/constants/branding";
+import type { AppDataTheme } from "@bao/shared/tokens/branding";
 import type { AppLanguageCode } from "@bao/shared/constants/settings";
 import type { AIProviderType, AIRouting } from "@bao/shared/types/ai";
 import type {

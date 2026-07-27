@@ -2,7 +2,7 @@
  * App settings types for single-user local-first app.
  */
 
-import type { AppDataTheme } from "../constants/branding";
+import type { AppDataTheme } from "../tokens/branding";
 import type {
   AppLanguageCode,
   AutomationBrowserOption,

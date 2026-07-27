@@ -1,6 +1,7 @@
 import { LOCAL_AI_AUTO_DETECT_MODEL, LOCAL_AI_SERVERS } from "@bao/shared/constants/ai-provider";
 import type { AIProviderDiagnostic } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import type { JsonValue } from "@bao/shared/utils/json";
 import { settle } from "@bao/shared/utils/promise";
 
 const LOCAL_PROVIDER_HEALTH_TIMEOUT_MS = 3_000;
@@ -26,7 +27,7 @@ type LocalModelDiscoveryResult =
       diagnostic: AIProviderDiagnostic;
     };
 
-const getModelIdFromPayloadEntry = (entry: unknown): string | null => {
+const getModelIdFromPayloadEntry = <T>(entry: T): string | null => {
   if (typeof entry !== "object" || entry === null || !("id" in entry)) {
     return null;
   }
@@ -59,7 +60,7 @@ const buildModelsUrl = (endpoint: string): string =>
     ? endpoint
     : `${endpoint.replace(TRAILING_SLASH_PATTERN, "")}/models`;
 
-const extractAvailableModels = (payload: unknown): string[] => {
+const extractAvailableModels = <T>(payload: T): string[] => {
   const data =
     typeof payload === "object" && payload !== null && "data" in payload ? payload.data : null;
   return Array.isArray(data)
@@ -74,7 +75,7 @@ const buildFetchFailureDiagnostic = (
   endpoint: string,
   checkedAt: string,
   selectedModel: string | undefined,
-  error: unknown,
+  error: Error | string,
 ): AIProviderDiagnostic => {
   const message = toErrorMessage(error);
   return buildDiagnosticResponse({
@@ -105,7 +106,7 @@ const buildPayloadDiagnostic = (
   endpoint: string,
   checkedAt: string,
   selectedModel: string | undefined,
-  payload: unknown,
+  payload: JsonValue,
 ): LocalModelDiscoveryResult => {
   const availableModels = extractAvailableModels(payload);
   if (availableModels.length === 0) {
@@ -156,7 +157,7 @@ const loadAvailableModels = async (
     return buildHttpFailureDiagnostic(endpoint, checkedAt, selectedModel, response.status);
   }
 
-  const payloadResult = await settle<unknown>(response.json());
+  const payloadResult = await settle<JsonValue>(response.json() as Promise<JsonValue>);
   if (payloadResult.status === "rejected") {
     return {
       diagnostic: buildDiagnosticResponse({

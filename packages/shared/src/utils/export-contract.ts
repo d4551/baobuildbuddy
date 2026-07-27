@@ -1,7 +1,11 @@
 import { EXPORT_DATE_LOCALE } from "../constants/export-layout";
 import type { ResumeTemplate } from "../constants/resume";
 import { isResumeTemplate, RESUME_TEMPLATE_DEFAULT } from "../constants/resume";
-import { isRecord } from "./type-guards";
+
+/** Untrusted cover-letter content arriving from persistence or API boundaries. */
+type CoverLetterContentInput =
+  | string
+  | Readonly<Record<string, string | ReadonlyArray<string> | undefined>>;
 
 const EXPORT_DATE_FORMATTER = new Intl.DateTimeFormat(EXPORT_DATE_LOCALE, {
   year: "numeric",
@@ -9,7 +13,7 @@ const EXPORT_DATE_FORMATTER = new Intl.DateTimeFormat(EXPORT_DATE_LOCALE, {
   day: "numeric",
 });
 
-const normalizeParagraphInput = (value: unknown): string[] => {
+const normalizeParagraphInput = (value: string | ReadonlyArray<string> | undefined): string[] => {
   if (typeof value === "string") {
     const trimmed = value.trim();
     return trimmed.length > 0 ? [trimmed] : [];
@@ -52,7 +56,7 @@ export const resolveResumeExportTemplate = (
 /**
  * CSS theme class applied to the resume preview shell for a template.
  * Class definitions are generated from RESUME_EXPORT_THEME_CONFIGS into
- * assets/css/resume-preview.generated.css (see scripts/generate-resume-preview-css.ts).
+ * assets/css/tokens-resume-preview.generated.css (see scripts/generate-resume-preview-css.ts).
  */
 export const resumePreviewThemeClass = (template: ResumeTemplate): string =>
   `resume-preview-theme-${template}`;
@@ -65,16 +69,12 @@ export const formatExportDate = (date: Date): string => EXPORT_DATE_FORMATTER.fo
 /**
  * Normalizes cover-letter content into canonical paragraph blocks for all export renderers.
  */
-export const toCoverLetterParagraphs = (content: unknown): string[] => {
+export const toCoverLetterParagraphs = (content: CoverLetterContentInput): string[] => {
   if (typeof content === "string") {
     return content
       .split("\n\n")
       .map((entry) => entry.trim())
       .filter((entry) => entry.length > 0);
-  }
-
-  if (!isRecord(content)) {
-    return [];
   }
 
   return [

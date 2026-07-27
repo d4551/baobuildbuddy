@@ -1,5 +1,6 @@
 import { API_ERROR_INVALID_GAMIFICATION_PAYLOAD } from "@bao/shared/constants/api-errors";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
+import type { JsonObject } from "@bao/shared/utils/json";
 import { isRecord } from "@bao/shared/utils/type-guards";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
@@ -29,7 +30,7 @@ export const importProfileSection = async (
         .select()
         .from(userProfile)
         .where(eq(userProfile.id, DEFAULT_PROFILE_ID));
-      const profile = isRecord(data.profile) ? data.profile : {};
+      const profile: JsonObject = isRecord(data.profile) ? data.profile : {};
       if (existing.length > 0) {
         const rest = omitImportMetadata(profile);
         await db

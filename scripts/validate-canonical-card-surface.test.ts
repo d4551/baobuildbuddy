@@ -1,11 +1,20 @@
 import { describe, expect, test } from "bun:test";
 import { collectBespokeCardSurfaces } from "./validate-canonical-card-surface";
 
+/**
+ * Wraps a template body in a minimal SFC.
+ *
+ * The body always lands on line 4, so a violation's reported line is checked
+ * against this constant rather than a bare literal.
+ */
 const wrapTemplate = (body: string): string => `<script setup lang="ts"></script>
 
 <template>
 ${body}
 </template>`;
+
+/** Line number the first line of a wrapped template body occupies. */
+const WRAPPED_BODY_FIRST_LINE = 4;
 
 describe("collectBespokeCardSurfaces flags hand-composed surfaces", () => {
   test("flags the exact composition ResumeLibraryPanel had shipped", () => {
@@ -15,7 +24,7 @@ describe("collectBespokeCardSurfaces flags hand-composed surfaces", () => {
     );
     expect(violations).toHaveLength(1);
     expect(violations[0]?.message).toContain("UiGlassCard");
-    expect(violations[0]?.line).toBe(4);
+    expect(violations[0]?.line).toBe(WRAPPED_BODY_FIRST_LINE);
   });
 
   test("flags a card composed with only a border utility", () => {

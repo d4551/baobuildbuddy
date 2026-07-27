@@ -1,5 +1,5 @@
 /**
- * Freshness gate for packages/client/assets/css/resume-preview.generated.css.
+ * Freshness gate for packages/client/assets/css/tokens-resume-preview.generated.css.
  *
  * The generated stylesheet is an SSOT surface derived from
  * RESUME_EXPORT_THEME_CONFIGS. Any hand-edit or stale regeneration is drift:
@@ -7,10 +7,7 @@
  */
 
 import { readFile } from "node:fs/promises";
-import {
-  renderResumePreviewCss,
-  RESUME_PREVIEW_CSS_PATH,
-} from "./generate-resume-preview-css";
+import { renderResumePreviewCss, RESUME_PREVIEW_CSS_PATH } from "./generate-resume-preview-css";
 import { reportViolations, type ValidationViolation } from "./utils/validation-helpers";
 
 const collectViolations = async (): Promise<ValidationViolation[]> => {

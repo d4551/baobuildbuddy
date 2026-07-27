@@ -1,3 +1,4 @@
+import { type JsonValue, safeParseJson } from "@bao/shared/utils/json";
 import { eq } from "drizzle-orm";
 import { db } from "../db/client";
 import { chatHistory } from "../db/schema/chat-history";
@@ -22,7 +23,13 @@ const REDACTED_SETTING_KEYS = [
   "emailTransportPassword",
 ] as const satisfies readonly (keyof typeof settings.$inferSelect)[];
 
-const redactSettings = (value: typeof settings.$inferSelect | undefined): unknown => {
+/** Converts a DB row to a validated JsonValue via JSON round-trip. */
+const toJsonValue = (value: object | null | undefined): JsonValue => {
+  if (!value) return null;
+  return safeParseJson(JSON.stringify(value)) ?? null;
+};
+
+const redactSettings = (value: typeof settings.$inferSelect | undefined): JsonValue => {
   if (!value) return null;
   const safeSettings = { ...value };
   for (const key of REDACTED_SETTING_KEYS) {
@@ -30,7 +37,7 @@ const redactSettings = (value: typeof settings.$inferSelect | undefined): unknow
       safeSettings[key] = "***REDACTED***";
     }
   }
-  return safeSettings;
+  return toJsonValue(safeSettings);
 };
 
 /**
@@ -60,17 +67,17 @@ export const exportAllData = async (): Promise<BaoExportData> => {
   return {
     version: DATA_EXPORT_VERSION,
     exportedAt: new Date().toISOString(),
-    profile: profileRows[0] || null,
+    profile: toJsonValue(profileRows[0] ?? null),
     settings: redactSettings(settingsRows[0]),
-    resumes: allResumes,
-    coverLetters: allCoverLetters,
-    portfolio: allPortfolios[0] || null,
-    portfolioProjects: allProjects,
-    interviewSessions: allInterviews,
-    gamification: gamRows[0] || null,
-    skillMappings: allSkills,
-    savedJobs: allSaved,
-    applications: allApps,
-    chatHistory: allChat,
+    resumes: allResumes.map(toJsonValue),
+    coverLetters: allCoverLetters.map(toJsonValue),
+    portfolio: toJsonValue(allPortfolios[0] ?? null),
+    portfolioProjects: allProjects.map(toJsonValue),
+    interviewSessions: allInterviews.map(toJsonValue),
+    gamification: toJsonValue(gamRows[0] ?? null),
+    skillMappings: allSkills.map(toJsonValue),
+    savedJobs: allSaved.map(toJsonValue),
+    applications: allApps.map(toJsonValue),
+    chatHistory: allChat.map(toJsonValue),
   };
 };

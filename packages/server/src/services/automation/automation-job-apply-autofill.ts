@@ -6,6 +6,8 @@ import {
   type SmartFieldAnalysisResult,
   smartFieldMapper,
 } from "./smart-field-mapper";
+import { safeParseJson } from "@bao/shared/utils/json";
+import type { JsonValue } from "@bao/shared/utils/json";
 
 const automationPreparationLogger = createServerLogger("automation-job-apply-preparation");
 
@@ -46,6 +48,11 @@ const createEmptyAutofillAnalysis = (): SmartFieldAnalysisResult => ({
   fieldAnswers: {},
 });
 
+const toJsonValue = (value: object | null | undefined): JsonValue => {
+  if (!value) return null;
+  return safeParseJson(JSON.stringify(value)) ?? null;
+};
+
 const buildSmartFieldAnalysisContext = (
   options: Pick<
     AutofillAnalysisOptions,
@@ -59,8 +66,10 @@ const buildSmartFieldAnalysisContext = (
     | "portfolioContext"
   >,
 ): SmartFieldAnalysisContext => ({
-  resume: Object.fromEntries(Object.entries(options.resume)),
-  coverLetter: options.coverLetter ? { content: options.coverLetter.content || {} } : null,
+  resume: toJsonValue(options.resume) as SmartFieldAnalysisContext["resume"],
+  coverLetter: options.coverLetter
+    ? { content: toJsonValue(options.coverLetter.content) ?? {} }
+    : null,
   existingAnswers: options.existingAnswers,
   ...(options.jobContext ? { jobContext: options.jobContext } : {}),
   ...(options.studioContext ? { studioContext: options.studioContext } : {}),

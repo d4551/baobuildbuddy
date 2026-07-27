@@ -144,11 +144,14 @@ export const AUTH_SHELL_OUTER_CLASS =
   "flex min-h-screen items-center justify-center bg-base-200 px-4 py-6 sm:py-10";
 
 /**
- * Auth card surface — solid content-plane (not glass). Consumed by
- * `layouts/auth-shell.vue` via `:class="AUTH_CARD_SHELL_CLASS"`.
- * Recognized by `validate:daisyui-contracts` as a card-bearing SSOT constant.
+ * Auth card sizing, passed to `UiGlassCard` as `extra-class` from
+ * `layouts/auth-shell.vue`.
+ *
+ * The surface itself now comes from the primitive's `solid` variant — an opaque
+ * content plane (design.md §4), not glass. Only the width contract lives here;
+ * the card token, background, and elevation are the primitive's job.
  */
-export const AUTH_CARD_SHELL_CLASS = "card w-full max-w-md bg-base-100 shadow-lg";
+export const AUTH_CARD_SHELL_CLASS = "w-full max-w-md";
 
 /**
  * Page header shell (title + description + optional actions row).
@@ -263,7 +266,7 @@ export const SHELL_SIDEBAR_ITEM_CLASS =
 
 /**
  * Active-state classes for a sidebar item. `menu-active` stays for daisyUI's
- * semantic state contract; `shell.css` repaints it as the designed primary pill
+ * semantic state contract; `theme-shell.css` repaints it as the designed primary pill
  * instead of daisyUI's opaque neutral slab.
  */
 export const SHELL_SIDEBAR_ITEM_ACTIVE_CLASS = "menu-active font-medium";

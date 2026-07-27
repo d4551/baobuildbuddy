@@ -36,15 +36,15 @@ import {
 
 const DEFAULT_INTERVIEW_CONVERSATION_STYLE: InterviewConversationStyle = "natural";
 
-export function normalizeInterviewMode(value: unknown): InterviewMode {
+export function normalizeInterviewMode<T>(value: T): InterviewMode {
   return value === "job" ? "job" : "studio";
 }
 
-export function normalizeConversationStyle(value: unknown): InterviewConversationStyle {
+export function normalizeConversationStyle<T>(value: T): InterviewConversationStyle {
   return value === "structured" ? "structured" : DEFAULT_INTERVIEW_CONVERSATION_STYLE;
 }
 
-export function normalizeCandidateContext(value: unknown): InterviewCandidateContext | undefined {
+export function normalizeCandidateContext<T>(value: T): InterviewCandidateContext | undefined {
   if (!isRecord(value)) {
     return;
   }
@@ -63,7 +63,7 @@ export function normalizeCandidateContext(value: unknown): InterviewCandidateCon
   };
 }
 
-export function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob | undefined {
+export function normalizeInterviewTargetJob<T>(value: T): InterviewTargetJob | undefined {
   if (!isRecord(value)) {
     return;
   }
@@ -116,7 +116,7 @@ export function normalizeInterviewTargetJob(value: unknown): InterviewTargetJob 
   return targetJob;
 }
 
-export function normalizeVoiceSettings(raw: unknown): VoiceSettings | undefined {
+export function normalizeVoiceSettings<T>(raw: T): VoiceSettings | undefined {
   if (!isRecord(raw)) {
     return;
   }

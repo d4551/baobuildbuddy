@@ -1,7 +1,7 @@
 /**
  * Provider interface for job aggregation
  */
-import { APP_BRAND } from "@bao/shared/constants/branding";
+import { APP_BRAND } from "@bao/shared/tokens/branding";
 import type { JobFilters as SharedJobFilters } from "@bao/shared/types/jobs";
 
 export const JOB_AGGREGATOR_VERSION = "1.0";

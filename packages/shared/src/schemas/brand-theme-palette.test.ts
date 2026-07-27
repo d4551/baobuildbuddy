@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { DEFAULT_BRAND_DARK_THEME, DEFAULT_BRAND_LIGHT_THEME } from "../constants/branding";
+import { DEFAULT_BRAND_DARK_THEME, DEFAULT_BRAND_LIGHT_THEME } from "../tokens/branding";
 import { brandThemePaletteSchema } from "./settings.schema";
 
 describe("brandThemePaletteSchema", () => {
