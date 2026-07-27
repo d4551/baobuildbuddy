@@ -1342,9 +1342,9 @@ bun run docs-site:bundle       # stage docs/ + release tree into dist/docs-site
 bun run docs-site:deploy       # upload over FTPS (credentials from the environment)
 ```
 
-`docs-site:deploy --dry-run` prints the upload plan without connecting. The bundler fails
+`docs-site:deploy -- --dry-run` prints the upload plan without connecting. The bundler fails
 closed if any artifact is still an LFS pointer, so a checkout without `git lfs pull` cannot
-publish 133-byte files as installers; pass `--skip-artifacts` for a page-only update.
+publish 133-byte files as installers; pass `-- --skip-artifacts` for a page-only update.
 
 In CI, `.github/workflows/deploy-docs-site.yml` publishes automatically after a successful
 `desktop-release` run on `main` — consuming that run's assembled all-OS artifact set — and on

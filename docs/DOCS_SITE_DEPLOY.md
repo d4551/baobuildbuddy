@@ -29,7 +29,7 @@ bun run docs-site:bundle       # build:docs-site + stage into dist/docs-site
 bun run docs-site:deploy       # upload dist/docs-site over FTPS
 ```
 
-`docs-site:deploy --dry-run` prints the upload plan and connects to nothing — use it to check
+`docs-site:deploy -- --dry-run` prints the upload plan and connects to nothing — use it to check
 the file list and the resolved host before publishing.
 
 ### Release binaries are Git LFS objects

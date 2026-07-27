@@ -9,7 +9,10 @@ BASELINE="bun@1.3.14"
 # passed through a variable because inlining it under single quotes double-escaped
 # the dots and the scan silently matched nothing.
 STALE_VERSION="1.3.11"
-STALE_PATTERN="bun@${STALE_VERSION}|\"${STALE_VERSION}\""
+# Dots are escaped: the pattern is an extended regex for rg/grep, so a bare "."
+# would match any character and make the scan both over- and under-eager.
+STALE_VERSION_PATTERN="${STALE_VERSION//./\\.}"
+STALE_PATTERN="bun@${STALE_VERSION_PATTERN}|\"${STALE_VERSION_PATTERN}\""
 CURRENT="$(bun pm pkg get packageManager | tr -d '[:space:]')"
 
 if [[ "$CURRENT" != "\"$BASELINE\"" ]]; then

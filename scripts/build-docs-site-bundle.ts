@@ -24,7 +24,7 @@
  *   DOCS_SITE_OUT     default "dist/docs-site"
  */
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { isRecord } from "../packages/shared/src/utils/type-guards";
 
 const ROOT_DIRECTORY = new URL("../", import.meta.url).pathname;
@@ -63,6 +63,23 @@ export const isLfsPointerFile = (path: string): boolean => {
 };
 
 /**
+ * Resolves a manifest-supplied relative path under `root`, failing closed if it
+ * escapes. `href` is percent-encoded in the manifest and has to be decoded before
+ * it can be used as a path, which is exactly where an encoded `..` or separator
+ * would let a hand-edited manifest write outside the staging directory.
+ */
+const resolveContainedPath = (root: string, relativePath: string, label: string): string => {
+  const resolvedRoot = resolve(root);
+  const resolved = resolve(resolvedRoot, relativePath);
+  if (resolved !== resolvedRoot && !resolved.startsWith(`${resolvedRoot}${sep}`)) {
+    throw new Error(
+      `Release manifest ${label} "${relativePath}" resolves outside ${resolvedRoot}. Refusing to stage it.`,
+    );
+  }
+  return resolved;
+};
+
+/**
  * Maps every manifest entry to its source in the canonical release tree.
  * `directoryId` is both the published path segment and the release-tree
  * subdirectory, so the layout is not re-derived here.
@@ -75,8 +92,12 @@ export const collectArtifactEntries = (
   manifest.platforms
     .flatMap((platform) => platform.files)
     .map((file) => ({
-      source: join(releasesRoot, file.directoryId, file.name),
-      target: join(outputRoot, decodeURIComponent(file.href)),
+      source: resolveContainedPath(
+        releasesRoot,
+        join(file.directoryId, file.name),
+        "artifact source",
+      ),
+      target: resolveContainedPath(outputRoot, decodeURIComponent(file.href), "href"),
     }));
 
 const copyFile = (source: string, target: string): void => {

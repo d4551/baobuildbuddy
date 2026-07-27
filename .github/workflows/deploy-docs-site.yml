@@ -86,13 +86,13 @@ jobs:
         timeout-minutes: 10
         run: |
           if [ "${{ github.event_name == 'workflow_dispatch' && github.event.inputs.skip_artifacts == 'true' }}" = "true" ]; then
-            bun run docs-site:bundle --skip-artifacts
+            bun run docs-site:bundle -- --skip-artifacts
           else
             bun run docs-site:bundle
           fi
 
       - name: Show upload plan
-        run: bun run docs-site:deploy --dry-run
+        run: bun run docs-site:deploy -- --dry-run
 
       - name: Publish over FTPS
         timeout-minutes: 20
