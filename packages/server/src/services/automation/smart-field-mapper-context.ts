@@ -1,13 +1,11 @@
 import { COUNT_THREE } from "@bao/shared/constants/numeric";
 import type { JsonObject } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { SmartFieldAnalysisContext } from "./smart-field-mapper-contracts";
 
 const FIELD_CONTEXT_ITEM_LIMIT = 6;
 const FIELD_CONTEXT_TEXT_LIMIT = 280;
 const FIELD_CONTEXT_SECTION_LIMIT = 4;
-
-const isRecord = <T>(value: T): value is T & JsonObject =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const getRecord = <T>(value: T, key: string): JsonObject | null => {
   if (!isRecord(value)) {

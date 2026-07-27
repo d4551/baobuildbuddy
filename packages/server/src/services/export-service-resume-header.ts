@@ -5,13 +5,9 @@ import {
   RESUME_LINKS_SPACING,
 } from "@bao/shared/constants/export-layout";
 import { COUNT_THREE, COUNT_TWENTY } from "@bao/shared/constants/numeric";
-import type { ResumeData } from "@bao/shared/types/resume";
+import type { ResumeData, ResumePersonalInfo } from "@bao/shared/types/resume";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
-import {
-  type ResumePersonalInfo,
-  type ResumeRenderContext,
-  toPdfColor,
-} from "./export-service-contracts";
+import { type ResumeRenderContext, toPdfColor } from "./export-service-contracts";
 import { drawResumeWrappedText, renderResumeSectionHeader } from "./export-service-resume-layout";
 
 function renderResumeName(context: ResumeRenderContext, name: string): void {

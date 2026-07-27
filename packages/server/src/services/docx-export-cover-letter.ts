@@ -8,13 +8,15 @@ import {
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import {
   type CoverLetterDocxTheme,
-  type CoverLetterPayload,
-  type CoverLetterUserProfile,
   createDivider,
   DOCX_COVER_LETTER_FONT_BODY_PT,
   DOCX_COVER_LETTER_FONT_HEADER_PT,
 } from "./docx-export-contracts";
-import type { CoverLetterContent } from "./export-service-contracts";
+import type {
+  CoverLetterContent,
+  CoverLetterPayload,
+  CoverLetterUserProfile,
+} from "./export-service-contracts";
 
 function buildCoverLetterHeader(
   userProfile: CoverLetterUserProfile,

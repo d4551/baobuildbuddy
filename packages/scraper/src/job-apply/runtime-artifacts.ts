@@ -1,6 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { settle } from "@bao/shared/utils/promise";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { Locator } from "playwright";
 import {
   type CaptureScreenshotOptions,
@@ -11,9 +12,6 @@ import {
   type UploadResumeArtifactOptions,
 } from "./runtime-contracts";
 import { runOnFirstMatchingLocator } from "./runtime-locators";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const getRecordValue = (value: unknown, key: string): unknown => {
   if (!isRecord(value)) {

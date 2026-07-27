@@ -1,4 +1,5 @@
 import type { Database } from "bun:sqlite";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import {
   AUTH_REQUIRED_COLUMNS,
   AUTH_TABLE_NAME,
@@ -12,9 +13,6 @@ import {
   STUDIOS_TABLE_NAME,
 } from "./init-constants";
 import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "./init-schema";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const ensureSingletonRows = (sqlite: Database): void => {
   sqlite.exec(`INSERT OR IGNORE INTO settings (id) VALUES ('${DEFAULT_SETTINGS_ID}')`);

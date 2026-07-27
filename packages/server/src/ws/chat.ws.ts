@@ -6,6 +6,7 @@ import { API_ERROR_GENERATE_RESPONSE } from "@bao/shared/constants/api-errors";
 import { resolveBrandSettings } from "@bao/shared/tokens/branding";
 import { toApiScopedPath, WS_ENDPOINTS } from "@bao/shared/constants/endpoints";
 import { type JsonObject, safeParseJson } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
@@ -41,10 +42,6 @@ type AutomationActionPayload = {
 type RuntimeBrand = ReturnType<typeof resolveBrandSettings>;
 
 const JOB_APPLY_ACTION_PATTERN = /\{"action"\s*:\s*"job_apply"[^{}]*\}/;
-
-function isRecord<T>(value: T): value is T & JsonObject {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
 
 function parseAutomationActionPayload(raw: string): AutomationActionPayload | null {
   const parsed = safeParseJson(raw);

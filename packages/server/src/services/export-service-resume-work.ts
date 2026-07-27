@@ -6,13 +6,9 @@ import {
   COUNT_TWENTY,
   PERCENT_HIGH,
 } from "@bao/shared/constants/numeric";
-import type { ResumeData } from "@bao/shared/types/resume";
+import type { ResumeData, ResumeExperienceItem, ResumeProject } from "@bao/shared/types/resume";
 
-import type {
-  ResumeExperienceItem,
-  ResumeProjectItem,
-  ResumeRenderContext,
-} from "./export-service-contracts";
+import type { ResumeRenderContext } from "./export-service-contracts";
 import {
   drawResumeWrappedText,
   ensureResumeSpace,
@@ -172,7 +168,7 @@ function renderResumeProjectTechnologies(
   context.yPosition -= COUNT_FIFTEEN;
 }
 
-function renderResumeProjectItem(context: ResumeRenderContext, project: ResumeProjectItem): void {
+function renderResumeProjectItem(context: ResumeRenderContext, project: ResumeProject): void {
   ensureResumeSpace(context, 60);
   context.page.drawText(project.title, {
     x: context.margin,

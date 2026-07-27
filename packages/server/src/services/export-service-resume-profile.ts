@@ -4,15 +4,10 @@ import {
   COUNT_THIRTY,
   COUNT_TWENTY,
 } from "@bao/shared/constants/numeric";
-import type { ResumeData } from "@bao/shared/types/resume";
+import type { ResumeData, ResumeEducationItem, ResumeSkills } from "@bao/shared/types/resume";
 import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 
-import type {
-  ResumeEducationItem,
-  ResumeRenderContext,
-  ResumeSkillGroupOptions,
-  ResumeSkillsData,
-} from "./export-service-contracts";
+import type { ResumeRenderContext, ResumeSkillGroupOptions } from "./export-service-contracts";
 import {
   drawResumeWrappedText,
   ensureResumeSpace,
@@ -90,7 +85,7 @@ function renderResumeSkillGroup(
   context.yPosition -= options.trailingGap;
 }
 
-function renderResumeInlineSkills(context: ResumeRenderContext, skills: ResumeSkillsData): void {
+function renderResumeInlineSkills(context: ResumeRenderContext, skills: ResumeSkills): void {
   renderResumeSkillGroup(context, {
     label: null,
     items: skills.technical,
@@ -107,7 +102,7 @@ function renderResumeInlineSkills(context: ResumeRenderContext, skills: ResumeSk
   });
 }
 
-function renderResumeGroupedSkills(context: ResumeRenderContext, skills: ResumeSkillsData): void {
+function renderResumeGroupedSkills(context: ResumeRenderContext, skills: ResumeSkills): void {
   renderResumeSkillGroup(context, {
     label: "> TECHNICAL",
     items: skills.technical,
@@ -124,7 +119,7 @@ function renderResumeGroupedSkills(context: ResumeRenderContext, skills: ResumeS
   });
 }
 
-function renderResumeColumnSkills(context: ResumeRenderContext, skills: ResumeSkillsData): void {
+function renderResumeColumnSkills(context: ResumeRenderContext, skills: ResumeSkills): void {
   renderResumeSkillGroup(context, {
     label: "Technical:",
     items: skills.technical,

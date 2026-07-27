@@ -1,13 +1,15 @@
-import type { ResumeData } from "@bao/shared/types/resume";
+import type {
+  ResumeData,
+  ResumeEducationItem,
+  ResumeExperienceItem,
+  ResumeProject,
+  ResumeSkills,
+} from "@bao/shared/types/resume";
 import { Paragraph, TextRun } from "docx";
 import {
   DOCX_RESUME_FONT_ACCENT_PT,
   DOCX_RESUME_FONT_BODY_PT,
   type DocxTemplateConfig,
-  type ResumeEducationItem,
-  type ResumeExperienceItem,
-  type ResumeProjectItem,
-  type ResumeSkillsData,
 } from "./docx-export-contracts";
 
 function buildDateLocationParagraph(
@@ -172,10 +174,7 @@ function buildSkillParagraph(
   });
 }
 
-export function buildSkillsSection(
-  skills: ResumeSkillsData,
-  config: DocxTemplateConfig,
-): Paragraph[] {
+export function buildSkillsSection(skills: ResumeSkills, config: DocxTemplateConfig): Paragraph[] {
   return [
     { label: "Technical", values: skills.technical },
     { label: "Soft Skills", values: skills.soft },
@@ -185,10 +184,7 @@ export function buildSkillsSection(
   );
 }
 
-export function buildProjectItem(
-  project: ResumeProjectItem,
-  config: DocxTemplateConfig,
-): Paragraph[] {
+export function buildProjectItem(project: ResumeProject, config: DocxTemplateConfig): Paragraph[] {
   const items: Paragraph[] = [
     new Paragraph({
       children: [

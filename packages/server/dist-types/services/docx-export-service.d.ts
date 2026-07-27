@@ -1,6 +1,6 @@
 import type { PortfolioMetadata, PortfolioProject } from "@bao/shared/types/portfolio";
 import type { ResumeData } from "@bao/shared/types/resume";
-import type { CoverLetterPayload, CoverLetterUserProfile } from "./docx-export-contracts";
+import type { CoverLetterPayload, CoverLetterUserProfile } from "./export-service-contracts";
 /**
  * DOCX export service for resumes, cover letters, and portfolios.
  */

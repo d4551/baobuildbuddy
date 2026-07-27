@@ -3,7 +3,8 @@
  */
 
 import { SCHEMA_MAX_ITEMS_XXLARGE } from "@bao/shared/constants/schema-limits";
-import { type JsonObject, safeParseJson } from "@bao/shared/utils/json";
+import { safeParseJson } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { JOB_AGGREGATOR_USER_AGENT, type JobProvider, type RawJob } from "./provider-interface";
 import { loadJobProviderSettings } from "./provider-settings";
 
@@ -28,9 +29,6 @@ interface GreenhouseJob {
 interface GreenhouseResponse {
   jobs: GreenhouseJob[];
 }
-
-const isRecord = <T>(value: T): value is T & JsonObject =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const isGreenhouseJob = <T>(value: T): value is T & GreenhouseJob => {
   if (!isRecord(value)) {

@@ -1,7 +1,6 @@
 import { type CoverLetterExportLayout, type PortfolioExportLayout } from "@bao/shared/constants/export-document-theme";
 import { A4_PAGE_HEIGHT, A4_PAGE_WIDTH } from "@bao/shared/constants/export-layout";
 import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-resume-theme";
-import type { ResumeData } from "@bao/shared/types/resume";
 import { type Color, type PDFDocument, type PDFFont, type PDFPage } from "pdf-lib";
 export interface RGB {
     r: number;
@@ -9,11 +8,6 @@ export interface RGB {
     b: number;
 }
 export type ResumeTemplateDefinition = ResumePdfThemeConfig;
-export type ResumeExperienceItem = NonNullable<ResumeData["experience"]>[number];
-export type ResumeEducationItem = NonNullable<ResumeData["education"]>[number];
-export type ResumeProjectItem = NonNullable<ResumeData["projects"]>[number];
-export type ResumeSkillsData = NonNullable<ResumeData["skills"]>;
-export type ResumePersonalInfo = NonNullable<ResumeData["personalInfo"]>;
 export interface WrappedTextOptions {
     text: string;
     x: number;

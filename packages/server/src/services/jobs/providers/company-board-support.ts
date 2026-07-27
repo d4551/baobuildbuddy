@@ -3,6 +3,7 @@ import type {
   JobProviderSettings,
 } from "@bao/shared/types/settings-contracts";
 import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { generateId } from "@bao/shared/utils/validation";
 
 export interface ATSJob {
@@ -37,9 +38,6 @@ type ATSResponseFields = {
 };
 
 export type ATSResponse = ATSJob[] | (ATSResponseFields & JsonObject);
-
-const isRecord = <T>(value: T): value is T & JsonObject =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const isAtsJob = <T>(value: T): value is T & ATSJob => isRecord(value);
 

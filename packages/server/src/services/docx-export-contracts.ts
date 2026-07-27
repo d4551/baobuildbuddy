@@ -15,22 +15,9 @@ import {
 } from "@bao/shared/constants/export-layout";
 import { RESUME_EXPORT_THEME_CONFIGS } from "@bao/shared/constants/export-resume-theme";
 import type { ResumeTemplate } from "@bao/shared/constants/resume";
-import type { ResumeData } from "@bao/shared/types/resume";
 import { BorderStyle, Paragraph, TextRun } from "docx";
-import type {
-  CoverLetterPayload as CanonicalCoverLetterPayload,
-  CoverLetterUserProfile as CanonicalCoverLetterUserProfile,
-} from "./export-service-contracts";
 
-export type ResumeExperienceItem = NonNullable<ResumeData["experience"]>[number];
-export type ResumeEducationItem = NonNullable<ResumeData["education"]>[number];
-export type ResumeProjectItem = NonNullable<ResumeData["projects"]>[number];
-export type ResumeSkillsData = NonNullable<ResumeData["skills"]>;
-export type ResumePersonalInfo = NonNullable<ResumeData["personalInfo"]>;
 export type DocxTemplateConfig = (typeof RESUME_EXPORT_THEME_CONFIGS)[ResumeTemplate]["docx"];
-
-export type CoverLetterPayload = CanonicalCoverLetterPayload;
-export type CoverLetterUserProfile = CanonicalCoverLetterUserProfile;
 
 export type { CoverLetterDocxTheme, PortfolioDocxTheme };
 
