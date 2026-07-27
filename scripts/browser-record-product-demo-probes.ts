@@ -11,6 +11,7 @@ const NUM_8 = 8;
  */
 import {
   FAKE_AUDIO_WAV,
+  KOKORO_ENDPOINT,
   LOCAL_ENDPOINT,
   RE_BAO_DEMO_DETERMINISTIC,
   RE_BUILD_DETERMINISTIC_CONTENT,
@@ -158,16 +159,21 @@ export const seedSpeechAndAiSettings = async (modelId: string): Promise<void> =>
             model: "whisper-tiny",
             endpoint: WHISPER_ENDPOINT,
           },
-          tts: speech.tts ?? {
-            provider: "browser",
-            model: "browser-default",
-            endpoint: "",
-            voice: "default",
-            format: "mp3",
+          // Seed local Kokoro, not the browser speechSynthesis path. Seeding
+          // `provider: "browser"` left the product in the exact state
+          // `validate:local-kokoro-tts` exists to forbid, and — because the
+          // seed is preserved on later runs — permanently 422'd
+          // `/api/speech/synthesize` for every proof that ran afterwards.
+          tts: {
+            provider: "local",
+            model: "kokoro",
+            endpoint: KOKORO_ENDPOINT,
+            voice: speech.tts?.voice ?? "af_heart",
+            format: "wav",
           },
         },
       },
     }),
   });
-  await writeOutput("seeded speech STT=local/whisper-tiny + local AI");
+  await writeOutput("seeded speech STT=local/whisper-tiny + TTS=local/kokoro + local AI");
 };

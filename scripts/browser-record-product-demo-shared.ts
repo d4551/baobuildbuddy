@@ -1,8 +1,10 @@
 /**
  * Shared helpers/constants for product demo recording modules.
  */
+
 import { join } from "node:path";
 import type { Locator, Page } from "playwright";
+import { DEFAULT_LOCAL_TTS_ENDPOINT } from "../packages/shared/src/constants/settings";
 import {
   artifactDir,
   resolveProofClientBase,
@@ -44,6 +46,11 @@ export const LOCAL_ENDPOINT = (
   resolveProofEnv("LOCAL_MODEL_ENDPOINT") ??
   resolveProofEnv("PRODUCT_DEMO_LOCAL_ENDPOINT") ??
   "http://127.0.0.1:11434/v1"
+).replace(TRAILING_SLASH_RE, "");
+export const KOKORO_ENDPOINT = (
+  resolveProofEnv("KOKORO_ENDPOINT") ??
+  resolveProofEnv("PRODUCT_DEMO_KOKORO_ENDPOINT") ??
+  DEFAULT_LOCAL_TTS_ENDPOINT
 ).replace(TRAILING_SLASH_RE, "");
 export const WHISPER_ENDPOINT = (
   resolveProofEnv("WHISPER_ENDPOINT") ??
