@@ -48,13 +48,14 @@ export interface OpenApiResponse {
   content?: Record<string, OpenApiMediaType>;
 }
 
-export interface OpenApiParameter {
+/** Parsed from an OpenAPI JSON document, so it must stay assignable to `JsonValue`. */
+export type OpenApiParameter = {
   name: string;
   in: "path" | "query" | "header" | "cookie";
   required?: boolean;
   description?: string;
   example?: string;
-}
+};
 
 export interface OpenApiOperation {
   operationId?: string;

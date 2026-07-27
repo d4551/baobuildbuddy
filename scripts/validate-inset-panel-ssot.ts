@@ -97,7 +97,7 @@ export const collectInsetPanelSsotViolationsForContent = (
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const entries = await collectProjectFileEntries({
     scanRoots: [...scanRoots],
-    allowedExtensions: [...sourceExtensions],
+    allowedExtensions: new Set(sourceExtensions),
   });
   return entries.flatMap((entry) =>
     collectInsetPanelSsotViolationsForContent(entry.filePath, entry.content),

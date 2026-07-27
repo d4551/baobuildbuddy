@@ -140,7 +140,11 @@ onUnmounted(() => {
         >{{ mobileSectionLabel }}</span>
       </NuxtLink>
       <div class="hidden flex-1 lg:block" :class="[TRUNCATE_FLEX_CHILD_CLASS]">
-        <AppBreadcrumbs :crumbs="navbarBreadcrumbs" class="truncate" />
+        <AppBreadcrumbs
+          :crumbs="navbarBreadcrumbs"
+          label-key="a11y.currentSection"
+          class="truncate"
+        />
       </div>
     </div>
     <div class="navbar-center hidden lg:flex transition-[opacity,height] duration-[var(--motion-standard)] ease-[var(--ease-response)]" :class="isScrolled ? ['overflow-hidden', 'opacity-0', MAX_HEIGHT_TOKEN_CLASS.maxH0] : []">

@@ -8,6 +8,7 @@ import {
 } from "@bao/shared/constants/ai-provider";
 import type { AIProviderDiagnostic, AIProviderType, AIRoutingPurpose } from "@bao/shared/types/ai";
 import type { AIProviderDiagnostics } from "@bao/shared/types/settings-contracts";
+import { asBoolean, asString, asStringArray, isRecord } from "@bao/shared/utils/type-guards";
 
 type AppSettingsSnapshot = {
   readonly preferredProvider?: string | null;
@@ -58,18 +59,6 @@ const resolvePreferredProviderId = (value?: string | null): AIProviderType => {
   const candidate = resolveNonEmptyString(value);
   return candidate && isProviderId(candidate) ? candidate : AI_PROVIDER_DEFAULT;
 };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
-
-const asString = (value: unknown): string | undefined =>
-  typeof value === "string" ? value : undefined;
-
-const asBoolean = (value: unknown): boolean | undefined =>
-  typeof value === "boolean" ? value : undefined;
-
-const asStringArray = (value: unknown): string[] =>
-  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : [];
 
 const providerHealthValues = new Set(["healthy", "degraded", "down", "unconfigured"]);
 

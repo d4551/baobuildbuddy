@@ -43,7 +43,7 @@ const OUT = resolveProofOutDir(
 );
 
 /** Minimal silent WAV — Whisper may return empty; also probe health + configured path. */
-const buildSilentWav = (): Uint8Array => {
+const buildSilentWav = (): Uint8Array<ArrayBuffer> => {
   const sampleRate = 16_000;
   const samples = sampleRate; // 1s
   const dataSize = samples * 2;
@@ -109,7 +109,7 @@ const ensureLocalSttSettings = async (): Promise<void> => {
   );
 };
 
-const loadWavBytes = async (): Promise<Uint8Array> => {
+const loadWavBytes = async (): Promise<Uint8Array<ArrayBuffer>> => {
   const spokenPath = artifactDir("live-capabilities", "kokoro-tts", "audio", "kokoro-api.wav");
   const spokenFile = Bun.file(spokenPath);
   if (await spokenFile.exists()) {
@@ -144,7 +144,7 @@ const classifyTranscribeStatus = (status: number, body: TranscribeBody): string 
   return null;
 };
 
-const runAppTranscribe = async (wavBytes: Uint8Array, findings: string[]): Promise<void> => {
+const runAppTranscribe = async (wavBytes: Uint8Array<ArrayBuffer>, findings: string[]): Promise<void> => {
   const audioBase64 = Buffer.from(wavBytes).toString("base64");
   const syn = await settle(
     fetch(`${SERVER_BASE}/api/speech/transcribe`, {
@@ -170,7 +170,7 @@ const runAppTranscribe = async (wavBytes: Uint8Array, findings: string[]): Promi
   }
 };
 
-const runDirectWhisper = async (wavBytes: Uint8Array, findings: string[]): Promise<void> => {
+const runDirectWhisper = async (wavBytes: Uint8Array<ArrayBuffer>, findings: string[]): Promise<void> => {
   const form = new FormData();
   form.append("file", new Blob([wavBytes], { type: "audio/wav" }), "speech.wav");
   form.append("model", "whisper-tiny");

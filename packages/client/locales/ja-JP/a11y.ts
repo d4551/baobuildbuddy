@@ -11,6 +11,7 @@ const a11y = {
     userMenu: "アカウントメニュー",
     skipToContent: "コンテンツへスキップ",
     breadcrumbs: "パンくずリスト",
+    currentSection: "現在のセクション",
     notifications: "通知",
     dismissNotification: "通知を閉じる",
     localeSwitcher: "言語を変更",

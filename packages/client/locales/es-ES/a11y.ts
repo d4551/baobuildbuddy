@@ -11,6 +11,7 @@ const a11y = {
     userMenu: "Menú de cuenta",
     skipToContent: "Saltar al contenido",
     breadcrumbs: "Ruta de navegación",
+    currentSection: "Sección actual",
     notifications: "Notificaciones",
     dismissNotification: "Descartar notificación",
     localeSwitcher: "Cambiar idioma",

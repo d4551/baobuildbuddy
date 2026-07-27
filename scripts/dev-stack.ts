@@ -185,7 +185,7 @@ const spawnClient = (): ManagedProcess => {
  * the API port) exits non-zero instead of masquerading as a clean shutdown —
  * a dev stack that dies with status 0 reads as success to `bun run` and CI.
  */
-const shutdown = async (reason: string, exitCode = EXIT_CODE_SUCCESS): Promise<void> => {
+const shutdown = async (reason: string, exitCode: number = EXIT_CODE_SUCCESS): Promise<void> => {
   if (shuttingDown) {
     return;
   }

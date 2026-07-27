@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
-import type { AppIconName } from "~/components/icons/icon-registry";
 import { resolveAppIconComponent } from "~/components/icons/icon-registry";
 import {
   ICON_SIZE_CLASS,
@@ -9,14 +8,7 @@ import {
   SURFACE_GLASS_SUBTLE_CLASS,
 } from "~/constants/layout";
 
-interface StatItem {
-  titleKey: string;
-  value: string | number;
-  valueClass?: string;
-  descKey: string;
-  descInterpolation?: Record<string, string | number>;
-  figure?: AppIconName;
-}
+import type { StatItem } from "~/types/ui-components";
 
 defineProps<{
   stats: readonly StatItem[];

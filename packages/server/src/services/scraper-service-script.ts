@@ -11,7 +11,8 @@ import {
   scrapedStudioSchema,
 } from "@bao/shared/schemas/automation-scripts.schema";
 import type { JobSearchResult } from "@bao/shared/types/jobs";
-import { type JsonObject, type JsonValue, safeParseJson } from "@bao/shared/utils/json";
+import { type JsonValue, safeParseJson } from "@bao/shared/utils/json";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { generateId } from "@bao/shared/utils/validation";
 import { config } from "../config/env";
 import { runAutomationScript } from "./automation/rpa-runner-process";
@@ -31,29 +32,23 @@ import {
   DEFAULT_JOB_TYPE,
 } from "./scraper-service-contracts";
 
-const asRecord = <T>(value: T): JsonObject | null =>
-  typeof value === "object" && value !== null && !Array.isArray(value)
-    ? Object.fromEntries(Object.entries(value))
-    : null;
-
 const parseJsonRows = <T>(raw: T): JsonValue[] => {
   if (Array.isArray(raw)) {
     return raw;
   }
 
-  const asObject = asRecord(raw);
-  if (!asObject) {
+  if (!isRecord(raw)) {
     return [];
   }
 
-  if (Array.isArray(asObject.items)) {
-    return asObject.items;
+  if (Array.isArray(raw.items)) {
+    return raw.items;
   }
-  if (Array.isArray(asObject.rows)) {
-    return asObject.rows;
+  if (Array.isArray(raw.rows)) {
+    return raw.rows;
   }
 
-  return [raw as JsonValue];
+  return [raw];
 };
 
 const normalizeHashInput = (value: string | undefined): string =>

@@ -1,11 +1,7 @@
-import {
-  APP_ROUTE_BUILDERS,
-  APP_ROUTE_QUERY_KEYS,
-  APP_ROUTES,
-} from "@bao/shared/constants/routes";
+import { APP_ROUTE_BUILDERS, APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "@bao/shared/constants/routes";
 import { SEARCH_RESULT_TYPES, type SearchResultType } from "@bao/shared/constants/search";
 import { settle } from "@bao/shared/utils/promise";
-import { isRecord } from "@bao/shared/utils/type-guards";
+import { asString, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { assertApiResponse, withLoadingState } from "~/composables/async-flow";
 import { useApi } from "~/composables/useApi";
@@ -47,10 +43,6 @@ export function resolveWorkspaceSearchResultRoute(result: WorkspaceSearchResult)
   return builder(result.id);
 }
 
-function asString(value: unknown): string {
-  return typeof value === "string" ? value : "";
-}
-
 function asSearchResultType(value: unknown): SearchResultType | null {
   if (typeof value !== "string") {
     return null;
@@ -74,10 +66,10 @@ function mapSearchResults(data: unknown): WorkspaceSearchResult[] {
     }
     mapped.push({
       type,
-      id: asString(entry.id),
-      title: asString(entry.title),
-      subtitle: asString(entry.subtitle),
-      snippet: asString(entry.snippet),
+      id: asString(entry.id) ?? "",
+      title: asString(entry.title) ?? "",
+      subtitle: asString(entry.subtitle) ?? "",
+      snippet: asString(entry.snippet) ?? "",
       relevance: typeof entry.relevance === "number" ? entry.relevance : 0,
     });
   }
@@ -95,8 +87,8 @@ function mapSuggestions(data: unknown): WorkspaceSearchSuggestion[] {
       continue;
     }
     mapped.push({
-      text: asString(entry.text),
-      type: asString(entry.type),
+      text: asString(entry.text) ?? "",
+      type: asString(entry.type) ?? "",
     });
   }
   return mapped;

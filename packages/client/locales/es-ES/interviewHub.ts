@@ -29,6 +29,7 @@ const interviewHub = {
       averageScoreDesc: "En sesiones completadas",
       improvementTitle: "Tendencia de Mejora",
       improvementDesc: "Cambio sesión a sesión",
+      noDataValue: "Sin datos aún",
     },
     prep: {
       title: "Lista de Preparación para Entrevista",

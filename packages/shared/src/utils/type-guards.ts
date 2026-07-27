@@ -14,8 +14,9 @@ export const asString = <T>(v: T): string | undefined =>
 export const asStringArray = <T>(v: T): string[] =>
   Array.isArray(v) ? v.filter((e): e is string => typeof e === "string") : [];
 
+/** Rejects NaN and ±Infinity — every consumer parses finite payload values (ports, scores, counts). */
 export const asNumber = <T>(v: T): number | undefined =>
-  typeof v === "number" && !Number.isNaN(v) ? v : undefined;
+  typeof v === "number" && Number.isFinite(v) ? v : undefined;
 
 export const asBoolean = <T>(v: T): boolean | undefined => (typeof v === "boolean" ? v : undefined);
 

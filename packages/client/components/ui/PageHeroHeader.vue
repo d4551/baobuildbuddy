@@ -39,7 +39,7 @@ const hasAside = computed(() => Boolean(slots.aside));
 <template>
   <section :class="PAGE_HERO_SECTION_CLASS">
     <div :class="heroContentClass">
-      <PageHeaderBlock 
+      <PageHeaderBlock
         :title-id="titleId"
         :title="title"
         :description="description"

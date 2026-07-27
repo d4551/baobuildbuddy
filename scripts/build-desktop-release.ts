@@ -1326,7 +1326,7 @@ const main = async (): Promise<void> => {
   if (!skipBuild && isLinuxReleaseTarget(requestedTarget)) {
     await signLinuxArtifacts(metadata, requestedTarget, stageRequest.profile);
   }
-  let artifactNames: string[];
+  let artifactNames: readonly string[];
   if (requestedTarget === "macos") {
     artifactNames = await stageMacosArtifacts(metadata, outputRoot, stageRequest.profile);
   } else if (requestedTarget === "windows") {

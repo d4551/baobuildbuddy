@@ -1,3 +1,5 @@
+import type { JsonObject, JsonValue } from "@bao/shared/utils/json";
+import { asJsonArray, isRecord } from "@bao/shared/utils/type-guards";
 import type {
   OpenApiMediaType,
   OpenApiParameter,
@@ -5,9 +7,6 @@ import type {
   OpenApiResponse,
   OpenApiSpec,
 } from "~/types/api-docs";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const isOpenApiParameterIn = (value: unknown): value is OpenApiParameter["in"] =>
   value === "path" || value === "query" || value === "header" || value === "cookie";
@@ -156,24 +155,19 @@ const dedupeParameters = (parameters: readonly OpenApiParameter[]): OpenApiParam
   return Array.from(unique.values()).filter((parameter) => parameter.name.length > 0);
 };
 
-export const getPathParameters = (pathItem: Record<string, unknown>): OpenApiParameter[] => {
-  const rawParameters = Array.isArray(pathItem.parameters) ? pathItem.parameters : [];
-  const normalized = rawParameters
-    .filter((parameter): parameter is OpenApiParameter => {
-      if (!isRecord(parameter)) {
-        return false;
-      }
+/** Single owner for "is this payload entry a usable OpenAPI parameter". */
+const isOpenApiParameter = (parameter: JsonValue): parameter is OpenApiParameter =>
+  isRecord(parameter) && typeof parameter.name === "string" && isOpenApiParameterIn(parameter.in);
 
-      if (typeof parameter.name !== "string") {
-        return false;
-      }
+/** Reads a `parameters` array off an OpenAPI node without widening it to `any`. */
+const readParameterEntries = (source: JsonValue | undefined): OpenApiParameter[] =>
+  (asJsonArray(source) ?? []).filter(isOpenApiParameter);
 
-      return isOpenApiParameterIn(parameter.in);
-    })
-    .map((parameter) => ({
-      ...parameter,
-      name: parameter.name.trim(),
-    }));
+export const getPathParameters = (pathItem: JsonObject): OpenApiParameter[] => {
+  const normalized = readParameterEntries(pathItem.parameters).map((parameter) => ({
+    ...parameter,
+    name: parameter.name.trim(),
+  }));
 
   return dedupeParameters(normalized);
 };
@@ -186,20 +180,7 @@ export const getOperationParameters = (
     return [];
   }
 
-  const parameters = Array.isArray(value.parameters) ? value.parameters : [];
-  const operationParameters = parameters.filter((parameter): parameter is OpenApiParameter => {
-    if (!isRecord(parameter)) {
-      return false;
-    }
-
-    if (typeof parameter.name !== "string") {
-      return false;
-    }
-
-    return isOpenApiParameterIn(parameter.in);
-  });
-
-  return dedupeParameters([...pathParameters, ...operationParameters]);
+  return dedupeParameters([...pathParameters, ...readParameterEntries(value.parameters)]);
 };
 
 export const readOpenApiRequestBody = (value: unknown): OpenApiRequestBody | undefined =>

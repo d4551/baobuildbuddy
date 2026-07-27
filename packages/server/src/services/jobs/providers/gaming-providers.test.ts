@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from "bun:test";
 import { jobProviderSettingsSchema } from "@bao/shared/schemas/settings.schema";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { GamingPortalId } from "@bao/shared/types/settings-contracts";
 import type { ScrapedJob } from "../../scraper-service";
 import type * as GamingProvidersModule from "./gaming-providers";
@@ -19,8 +20,6 @@ const loggerEntries: {
 };
 
 const noopLogger = (): void => undefined;
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
 const isProviderModule = (value: unknown): value is ProviderModule =>
   isRecord(value) && typeof value.GamingPortalProvider === "function";
 

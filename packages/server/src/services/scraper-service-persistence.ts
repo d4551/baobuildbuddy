@@ -6,6 +6,7 @@ import { generateId } from "@bao/shared/utils/validation";
 import { db } from "../db/client";
 import { jobs } from "../db/schema/jobs";
 import { studios } from "../db/schema/studios";
+import { resolveContentHash } from "./jobs/deduplication";
 import { extractRequirements, extractTechnologies } from "./jobs/job-aggregator-taxonomy";
 import { loadJobProviderSettings } from "./jobs/providers/provider-settings";
 
@@ -14,7 +15,6 @@ import type {
   ScrapeEnrichmentAttempt,
 } from "./scraper-service-contracts";
 import {
-  CONTENT_HASH_LENGTH,
   DEFAULT_JOB_SOURCE,
   DEFAULT_JOB_TYPE,
   PORTAL_SCRIPT_ID_BY_ID,
@@ -93,19 +93,8 @@ export const upsertStudioRow = async (
  * The fallback is now derived from the posting's own stable fields, so identity is
  * reproducible across runs even when a provider omits its hash.
  */
-export const resolveJobContentHash = (job: JobSearchResult["jobs"][number]): string => {
-  const rawContentHash = job.contentHash?.trim() ?? "";
-  if (rawContentHash.length > 0) {
-    return rawContentHash.slice(0, CONTENT_HASH_LENGTH);
-  }
-
-  const canonical = [job.url ?? "", job.title, job.company, job.location]
-    .map((part) => String(part).trim().toLowerCase())
-    .join("|");
-  const hasher = new Bun.CryptoHasher("sha256");
-  hasher.update(canonical);
-  return hasher.digest("hex").slice(0, CONTENT_HASH_LENGTH);
-};
+export const resolveJobContentHash = (job: JobSearchResult["jobs"][number]): string =>
+  resolveContentHash(job);
 
 const resolveJobSource = (job: JobSearchResult["jobs"][number]): string => {
   const trimmed = job.source?.trim() ?? "";

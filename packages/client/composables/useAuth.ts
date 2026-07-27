@@ -1,4 +1,5 @@
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { useNuxtRuntimeApp } from "./nuxtRuntime";
 import { useApi } from "./useApi";
 
@@ -14,9 +15,6 @@ interface AuthInitResult {
   apiKey?: string;
   message?: string;
 }
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 interface UseAuthState {
   checkAuthStatus: () => Promise<AuthStatus>;

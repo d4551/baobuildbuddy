@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type * as StatisticsServiceModule from "./statistics-service";
 
 type LoggerEntry = readonly unknown[];
@@ -11,8 +12,6 @@ const loggerEntries: {
 };
 
 const noopLogger = (): void => undefined;
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
 const isServiceModule = (value: unknown): value is ServiceModule =>
   isRecord(value) && "statisticsService" in value;
 

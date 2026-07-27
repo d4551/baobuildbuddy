@@ -70,7 +70,7 @@ export const collectBadgeActionSsotViolationsForContent = (
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const entries = await collectProjectFileEntries({
     scanRoots: [...scanRoots],
-    allowedExtensions: [...sourceExtensions],
+    allowedExtensions: new Set(sourceExtensions),
   });
   return entries.flatMap((entry) =>
     collectBadgeActionSsotViolationsForContent(entry.filePath, entry.content),

@@ -12,6 +12,7 @@ import { db, sqlite } from "../db/client";
 import { initializeDatabase } from "../db/init";
 import { jobs } from "../db/schema/jobs";
 import { settings } from "../db/schema/settings";
+import { resolveContentHash } from "./jobs/deduplication";
 import { scraperService } from "./scraper-service";
 
 const TEST_SCRIPT_NAME = "scraper_contract_test.ts";
@@ -161,7 +162,15 @@ process.exit(0);
     expect(firstRun.upserted).toBe(1);
     const firstRows = await db.select().from(jobs);
     const firstHash = firstRows[0]?.contentHash ?? "";
-    expect(firstHash.startsWith("job-")).toBe(true);
+    // Identity is whatever the single owner derives from the posting, not a prefixed
+    // scheme of the scraper's own — a second scheme is what let one posting be stored twice.
+    expect(firstHash).toBe(
+      resolveContentHash({
+        title: "AI Gameplay Engineer",
+        company: "Studio Hash",
+        location: "Remote",
+      }),
+    );
 
     await db.delete(jobs);
 

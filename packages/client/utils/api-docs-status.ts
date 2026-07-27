@@ -3,6 +3,7 @@ import {
   HTTP_STATUS_TOO_MANY_REQUESTS,
   HTTP_STATUS_UNAUTHORIZED,
 } from "@bao/shared/constants/http";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type { ApiDocsUiState, ApiHttpMethod } from "~/types/api-docs";
 
 export const API_DOCS_HTTP_METHODS_ORDER = [
@@ -15,9 +16,6 @@ export const API_DOCS_HTTP_METHODS_ORDER = [
   "options",
   "trace",
 ] as const satisfies readonly ApiHttpMethod[];
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 export const isApiHttpMethod = (value: string): value is ApiHttpMethod =>
   API_DOCS_HTTP_METHODS_ORDER.some((method) => method === value);

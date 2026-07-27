@@ -29,6 +29,7 @@ const interviewHub = {
       averageScoreDesc: "Across completed sessions",
       improvementTitle: "Improvement Trend",
       improvementDesc: "Session-over-session change",
+      noDataValue: "No data yet",
     },
     prep: {
       title: "Interview Readiness Checklist",

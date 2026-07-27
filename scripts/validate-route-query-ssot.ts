@@ -42,7 +42,7 @@ export const collectRouteQuerySsotViolationsForContent = (
 const collectViolations = async (): Promise<ValidationViolation[]> => {
   const files = await collectProjectFileEntries({
     scanRoots: [...SCAN_ROOTS],
-    allowedExtensions: [...SOURCE_EXTENSIONS],
+    allowedExtensions: new Set(SOURCE_EXTENSIONS),
   });
   return files.flatMap(({ filePath, content }) =>
     collectRouteQuerySsotViolationsForContent(filePath, content),

@@ -310,7 +310,7 @@ const validateRecordOrPush = (
   missingMessage: string,
   validate: (record: { [key: string]: SoftenerJsonValue }) => void,
 ): void => {
-  if (!isSoftenerRecord(value)) {
+  if (value === undefined || !isSoftenerRecord(value)) {
     push(missingMessage);
     return;
   }

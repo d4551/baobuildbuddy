@@ -78,7 +78,7 @@ const parseScanResult = (v: JsonValue): ScanResult | null => {
 
 const payloadRaw = safeParseJson(readFileSync("/tmp/brutalise-payload.json", "utf8"));
 const payloadObj = isObject(payloadRaw) ? payloadRaw : null;
-const filesRaw = payloadObj?.files;
+const filesRaw = payloadObj?.files ?? null;
 const allFiles: Array<{ path: string; content: string }> = isArray(filesRaw)
   ? filesRaw
       .filter(isObject)

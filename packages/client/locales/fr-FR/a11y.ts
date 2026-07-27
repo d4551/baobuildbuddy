@@ -11,6 +11,7 @@ const a11y = {
     userMenu: "Menu du compte",
     skipToContent: "Aller au contenu",
     breadcrumbs: "Fil d'Ariane",
+    currentSection: "Section actuelle",
     dismissNotification: "Fermer la notification",
     localeSwitcher: "Changer de langue",
     localeOptionAria: "Changer la langue en {locale}",

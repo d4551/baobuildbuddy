@@ -20,15 +20,10 @@ import {
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
 import { reportFindingsAndExit } from "./utils/proof-findings";
-import {
-  artifactDir,
-  resolveProofClientBase,
-  resolveProofOutDir,
-} from "./utils/proof-script-env";
+import { artifactDir, resolveProofClientBase, resolveProofOutDir } from "./utils/proof-script-env";
 
 const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
-const OUT =
-  resolveProofOutDir(
+const OUT = resolveProofOutDir(
   "ON_DEVICE_SPEECH_OUT",
   artifactDir("live-capabilities", "on-device-speech"),
 );
@@ -40,6 +35,21 @@ const DESKTOP_VIEWPORT = {
   width: VIEWPORT_WIDTH_DESKTOP,
   height: VIEWPORT_HEIGHT_DESKTOP,
 } as const;
+
+/**
+ * `lib.dom` declares the Web Speech *event* types but not the recognition interface, so the
+ * page-context script below has no name for what it constructs and patches. Declared here
+ * with exactly the members this proof touches rather than widened away.
+ */
+interface SpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((ev: SpeechRecognitionEvent) => void) | null;
+  onerror: ((ev: SpeechRecognitionErrorEvent) => void) | null;
+  start(): void;
+  stop(): void;
+}
 
 type SpeechHooks = {
   recognitionStarts: number;

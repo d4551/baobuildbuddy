@@ -1,7 +1,7 @@
 import type { Job, SalaryRange } from "@bao/shared/types/jobs";
 import { normalizeJobType } from "@bao/shared/utils/job-normalizers";
 import type { jobs } from "../../db/schema/jobs";
-import { generateContentHash } from "./deduplication";
+import { resolveContentHash } from "./deduplication";
 import {
   detectExperienceLevel,
   detectHybrid,
@@ -62,7 +62,7 @@ const applyOptionalRowFields = (job: Job, row: typeof jobs.$inferSelect): Job =>
 });
 
 export const rawJobToInsert = async (raw: RawJob): Promise<typeof jobs.$inferInsert> => {
-  const contentHash = generateContentHash(raw);
+  const contentHash = resolveContentHash(raw);
   const applyUrl = typeof raw.applyUrl === "string" && raw.applyUrl.trim() ? raw.applyUrl : null;
   const [remote, hybrid, requirements, technologies, studioType, gameGenres, platforms, tags] =
     await Promise.all([

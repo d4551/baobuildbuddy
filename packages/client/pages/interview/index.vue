@@ -78,6 +78,25 @@ const {
   isStartDisabled,
   selectJobById,
 } = useInterviewHubPage();
+
+/**
+ * With no completed sessions there is no score and no trend to report. Rendering the
+ * `?? 0` defaults would present absent data as a measured 0% and a success-coloured
+ * `+0%` improvement, so the empty case gets its own copy and a neutral tone instead.
+ */
+const hasScoredSessions = computed(() => totalSessions.value > 0);
+const averageScoreValue = computed(() =>
+  hasScoredSessions.value ? `${averageScore.value}%` : t("interviewHub.stats.noDataValue"),
+);
+const improvementTrendValue = computed(() =>
+  hasScoredSessions.value
+    ? `${improvementTrend.value >= 0 ? "+" : ""}${improvementTrend.value}%`
+    : t("interviewHub.stats.noDataValue"),
+);
+const improvementTrendClass = computed(() => {
+  if (!hasScoredSessions.value) return "text-secondary";
+  return improvementTrend.value >= 0 ? "text-success" : "text-error";
+});
 </script>
 
 <template>
@@ -138,8 +157,8 @@ const {
       <StatsRow
         :stats="[
           { titleKey: 'interviewHub.stats.totalSessionsTitle', value: totalSessions, valueClass: 'text-primary', descKey: 'interviewHub.stats.totalSessionsDesc' },
-          { titleKey: 'interviewHub.stats.averageScoreTitle', value: `${averageScore}%`, valueClass: 'text-secondary', descKey: 'interviewHub.stats.averageScoreDesc' },
-          { titleKey: 'interviewHub.stats.improvementTitle', value: `${improvementTrend >= 0 ? '+' : ''}${improvementTrend}%`, valueClass: improvementTrend >= 0 ? 'text-success' : 'text-error', descKey: 'interviewHub.stats.improvementDesc' },
+          { titleKey: 'interviewHub.stats.averageScoreTitle', value: averageScoreValue, valueClass: 'text-secondary', descKey: 'interviewHub.stats.averageScoreDesc' },
+          { titleKey: 'interviewHub.stats.improvementTitle', value: improvementTrendValue, valueClass: improvementTrendClass, descKey: 'interviewHub.stats.improvementDesc' },
         ]"
       />
 

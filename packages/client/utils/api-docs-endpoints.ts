@@ -1,3 +1,4 @@
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type {
   ApiEndpoint,
   ApiEndpointGroup,
@@ -17,9 +18,6 @@ import {
   isApiHttpMethod,
   normalizeApiDocsPathForId,
 } from "~/utils/api-docs-status";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const dedupeCaseInsensitiveStrings = (values: readonly string[]): string[] => {
   const seen = new Set<string>();

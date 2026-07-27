@@ -5,6 +5,7 @@ import {
 } from "@bao/shared/constants/http";
 import type { RpaRunEvent, RpaRunExecutionEnvelope } from "@bao/shared/schemas/rpa-events.schema";
 import type { AutomationRunUiState } from "@bao/shared/schemas/rpa-protocol.schema";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import { getCurrentScope, onScopeDispose, type Ref, readonly, ref } from "vue";
 import { PERCENT_MAX } from "~/constants/numeric-ui";
 import automationJobApplyCatalog from "~/locales/en-US/automation/jobApply";
@@ -60,9 +61,6 @@ interface StreamDependencies {
 interface UseAutomationRunStreamOptions {
   fallbackMessage?: string;
 }
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
 
 const toStreamError = (error: unknown, fallbackMessage: string): StreamError => {
   if (!isRecord(error)) {

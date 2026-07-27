@@ -96,7 +96,7 @@ const pathExists = async (absolutePath: string): Promise<boolean> =>
 
 const runCommand = async (command: readonly string[], outputMessage: string): Promise<boolean> => {
   await writeOutput(outputMessage);
-  const processHandle = Bun.spawn(command, {
+  const processHandle = Bun.spawn([...command], {
     cwd: process.cwd(),
     stdout: "inherit",
     stderr: "inherit",

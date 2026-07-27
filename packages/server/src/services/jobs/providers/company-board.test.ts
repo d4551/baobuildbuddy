@@ -1,5 +1,6 @@
 import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 import { jobProviderSettingsSchema } from "@bao/shared/schemas/settings.schema";
+import { isRecord } from "@bao/shared/utils/type-guards";
 import type * as CompanyBoardModule from "./company-board";
 import type { RawJob } from "./provider-interface";
 
@@ -19,8 +20,6 @@ const loggerEntries: {
 };
 
 const noopLogger = (): void => undefined;
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
 const isProviderModule = (value: unknown): value is ProviderModule =>
   isRecord(value) && typeof value.CompanyBoardProvider === "function";
 

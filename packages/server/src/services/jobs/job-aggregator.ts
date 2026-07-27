@@ -88,14 +88,25 @@ export class JobAggregator {
       .limit(1);
 
     if (existing.length === 0) {
-      await db.insert(jobs).values(job);
+      // The column default is SQLite's `CURRENT_TIMESTAMP`, which emits `YYYY-MM-DD HH:MM:SS`
+      // while every application write uses ISO-8601. Both landed in the same text column, and
+      // because SQLite compares it as text — `' '` (0x20) sorts before `'T'` (0x54) — every
+      // default-stamped row sorted ahead of every ISO row regardless of actual time. Stamping
+      // the insert explicitly keeps one format in the column.
+      const now = new Date().toISOString();
+      await db.insert(jobs).values({ ...job, createdAt: now, updatedAt: now });
       return "new";
     }
 
+    // `rawJobToInsert` mints a fresh `crypto.randomUUID()` for the insert path. Spreading it
+    // into the update reassigned the row's primary key on every refresh, so job detail URLs
+    // 404ed after each run and `savedJobs.jobId` references were orphaned. The row keeps the
+    // identity it was first stored under.
     await db
       .update(jobs)
       .set({
         ...job,
+        id: existing[0].id,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(jobs.id, existing[0].id));

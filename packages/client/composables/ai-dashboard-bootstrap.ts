@@ -1,5 +1,6 @@
 import { AI_PROVIDER_DEFAULT } from "@bao/shared/constants/ai-provider";
 import type { AIProviderType } from "@bao/shared/types/ai";
+import { asNumber, isRecord } from "@bao/shared/utils/type-guards";
 import { useI18n } from "vue-i18n";
 import { PERCENT_MAX } from "~/constants/numeric-ui";
 import type {
@@ -19,13 +20,6 @@ export type DashboardBootstrap = {
   normalizedStats: AiDashboardStats;
   resolvedProviders: ProviderConfig[];
 };
-
-const asNumber = (value: unknown): number | undefined =>
-  typeof value === "number" && Number.isFinite(value) ? value : undefined;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
 
 function readNumberField(payload: Record<string, unknown>, key: string): number | undefined {
   return asNumber(payload[key]);
