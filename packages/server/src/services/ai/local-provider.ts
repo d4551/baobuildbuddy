@@ -20,6 +20,7 @@ import { settle } from "@bao/shared/utils/promise";
 import OpenAI from "openai";
 import {
   detectFirstLocalProviderModel,
+  listLocalProviderModelIds,
   detectLocalProviderServers,
   inspectLocalProviderEndpoint,
 } from "./local-provider-diagnostics";
@@ -101,13 +102,38 @@ export class LocalProvider extends BaseAIProvider {
     });
   }
 
+  /**
+   * Per-request model wins, but only if the local server actually serves it.
+   *
+   * Routing fills the per-request model from `preferredModel`, which is a
+   * cross-provider preference seeded with a default name. When that name is not
+   * installed locally the server 404s and the whole call fails with "All providers
+   * failed to generate" — even though the operator had configured a working model
+   * under `localModelName`. Falling back to the configured (or auto-detected) model
+   * keeps an explicit local configuration authoritative for the local provider.
+   */
   private async resolveRequestedModel(requestedModel?: string): Promise<string | null> {
-    if (typeof requestedModel === "string" && requestedModel.trim().length > 0) {
-      return requestedModel.trim();
+    const resolved = await this.resolveModelIfNeeded();
+    const configured = resolved ? this.model : null;
+    const requested =
+      typeof requestedModel === "string" && requestedModel.trim().length > 0
+        ? requestedModel.trim()
+        : null;
+    if (!requested) {
+      return configured;
+    }
+    if (!configured || requested === configured) {
+      return requested;
     }
 
-    const resolved = await this.resolveModelIfNeeded();
-    return resolved ? this.model : null;
+    if (!this.baseUrl) {
+      return requested;
+    }
+    const available = await settle(LocalProvider.listModelIds(this.baseUrl));
+    if (available.status === "rejected") {
+      return requested;
+    }
+    return available.value.includes(requested) ? requested : configured;
   }
 
   private async createCompletion(
@@ -243,6 +269,11 @@ export class LocalProvider extends BaseAIProvider {
    */
   static async detectFirstModel(baseUrl: string): Promise<string | null> {
     return await detectFirstLocalProviderModel(baseUrl);
+  }
+
+  /** Model ids the configured local endpoint serves. */
+  static async listModelIds(baseUrl: string): Promise<readonly string[]> {
+    return await listLocalProviderModelIds(baseUrl);
   }
 
   /**
