@@ -338,6 +338,27 @@ flowchart TB
   AIChat --> SQLite
 ```
 
+**Provisioning the speech services.** Both servers are Python and neither ships
+its dependencies or model weights, so `speech:whisper:serve` and
+`speech:kokoro:serve` exit immediately until you install them once:
+
+```bash
+# Whisper STT (:8090) — real faster-whisper inference
+pip install faster-whisper fastapi uvicorn python-multipart
+bun run speech:whisper:serve            # downloads the `tiny` model on first run
+
+# Kokoro TTS (:8880) — on-device ONNX, weights are not bundled
+pip install kokoro-onnx
+mkdir -p ~/.bao/kokoro && cd ~/.bao/kokoro
+curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+bun run speech:kokoro:serve             # 54 voices, af_heart by default
+```
+
+Override the model/voice locations with `KOKORO_MODEL_PATH` / `KOKORO_VOICES_PATH`
+and the Whisper size with `WHISPER_MODEL`. The headed proofs additionally need an
+X server and an encoder — `xvfb-run` (or `DISPLAY=:99` with `Xvfb`) plus `ffmpeg`.
+
 **Fail-closed proofs (no speechSynthesis-only greens):**
 
 | Proof | What it proves |
