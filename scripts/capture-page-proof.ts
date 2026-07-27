@@ -1,6 +1,6 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { chromium } from "playwright";
+import { type Browser, chromium, type Page } from "playwright";
 import { APP_ROUTE_QUERY_KEYS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { writeError, writeOutput } from "./utils/cli-output";
 
@@ -11,35 +11,21 @@ type ViewportSize = {
   readonly height: number;
 };
 
-type ScreenshotOptions = {
-  readonly path: string;
-  readonly fullPage: boolean;
-};
-
 type PageSignalSnapshot = {
   readonly heading: string | null;
   readonly alerts: readonly string[];
   readonly bodyText: string;
 };
 
-type PageInstance = {
-  goto(
-    url: string,
-    options: { readonly waitUntil: "domcontentloaded"; readonly timeout: number },
-  ): Promise<void>;
-  waitForLoadState(
-    state: "domcontentloaded" | "load",
-    options: { readonly timeout: number },
-  ): Promise<void>;
-  title(): Promise<string>;
-  evaluate<Result>(handler: () => Result): Promise<Result>;
-  screenshot(options: ScreenshotOptions): Promise<Uint8Array>;
-};
-
-type BrowserInstance = {
-  newPage(options: { readonly viewport: ViewportSize }): Promise<PageInstance>;
-  close(): Promise<void>;
-};
+/**
+ * Playwright's own types, not a hand-written subset. The local shapes declared
+ * `goto` as returning `Promise<void>` while Playwright resolves `Response | null`, and
+ * `Promise` is invariant — so the real `Browser` stopped being assignable the moment the
+ * driver's signature moved. A structural mirror of a dependency drifts silently; the
+ * dependency is already imported here, so it owns these types.
+ */
+type PageInstance = Page;
+type BrowserInstance = Browser;
 
 type PageProofRouteSpec = {
   readonly slug: string;

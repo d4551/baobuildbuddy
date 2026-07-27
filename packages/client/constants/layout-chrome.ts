@@ -159,6 +159,17 @@ export const AUTH_CARD_SHELL_CLASS = "w-full max-w-md";
 export const PAGE_HEADER_OUTER_CLASS =
   "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4";
 
+/**
+ * Page header layout for a header that shares its row with a hero aside.
+ *
+ * The default goes `sm:flex-row`, so title and actions split the header's width. That is
+ * fine when the header owns the row, but a hero with an aside gives the header only what
+ * the aside leaves — and the actions row is `shrink-0`, so the title absorbs the entire
+ * shortfall. On the job detail hero that reduced an `h1` to 80px across four lines.
+ * Stacking keeps the title on its own full-width line.
+ */
+export const PAGE_HEADER_OUTER_STACKED_CLASS = "flex flex-col gap-2";
+
 /** Primary page title (`h1` / `h2` in PageHeaderBlock) — compact @320, full from sm. */
 export const PAGE_HEADER_TITLE_CLASS = "text-xl font-bold sm:text-2xl";
 

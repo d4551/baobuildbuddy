@@ -37,6 +37,24 @@ const DESKTOP_VIEWPORT = {
 } as const;
 
 /**
+ * The result surface this proof constructs and the app under test reads. Modelling it
+ * explicitly avoids asserting the fabricated event *is* a DOM `SpeechRecognitionEvent` —
+ * that claim was a lazy cast over a shape with no real overlap (no `item()`, no
+ * `SpeechRecognitionResultList`), so the compiler could not check either side of it.
+ */
+interface SpeechProofResultEvent extends Event {
+  readonly results: {
+    readonly 0: {
+      readonly 0: { readonly transcript: string };
+      readonly isFinal: boolean;
+      readonly length: number;
+    };
+    readonly length: number;
+  };
+  readonly resultIndex: number;
+}
+
+/**
  * `lib.dom` declares the Web Speech *event* types but not the recognition interface, so the
  * page-context script below has no name for what it constructs and patches. Declared here
  * with exactly the members this proof touches rather than widened away.
@@ -45,7 +63,7 @@ interface SpeechRecognition {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
-  onresult: ((ev: SpeechRecognitionEvent) => void) | null;
+  onresult: ((ev: SpeechProofResultEvent) => void) | null;
   onerror: ((ev: SpeechRecognitionErrorEvent) => void) | null;
   start(): void;
   stop(): void;
@@ -83,7 +101,7 @@ const onDeviceSpeechInitScript = (): void => {
       continuous = false;
       interimResults = false;
       lang = "en-US";
-      onresult: ((ev: SpeechRecognitionEvent) => void) | null = null;
+      onresult: ((ev: SpeechProofResultEvent) => void) | null = null;
       onerror: ((ev: SpeechRecognitionErrorEvent) => void) | null = null;
       onend: (() => void) | null = null;
       start(): void {
@@ -97,7 +115,7 @@ const onDeviceSpeechInitScript = (): void => {
             length: 1,
           },
           resultIndex: 0,
-        }) as SpeechRecognitionEvent;
+        });
         queueMicrotask(() => {
           this.onresult?.(resultEvent);
           this.onend?.();

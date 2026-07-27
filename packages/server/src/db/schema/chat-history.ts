@@ -1,5 +1,5 @@
-import { sql } from "drizzle-orm";
 import { index, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { TIMESTAMP_DEFAULT } from "./column-defaults";
 
 export const chatHistory = sqliteTable(
   "chat_history",
@@ -9,7 +9,7 @@ export const chatHistory = sqliteTable(
     content: text("content").notNull(),
     timestamp: text("timestamp").notNull(),
     sessionId: text("session_id"),
-    createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+    createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
   },
   (table) => [
     index("chat_history_session_id_idx").on(table.sessionId),

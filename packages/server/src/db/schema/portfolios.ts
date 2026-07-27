@@ -1,11 +1,12 @@
 import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { TIMESTAMP_DEFAULT } from "./column-defaults";
 
 export const portfolios = sqliteTable("portfolios", {
   id: text("id").primaryKey(),
   metadata: text("metadata", { mode: "json" }).$type<Record<string, unknown>>(),
-  createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+  createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+  updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
 });
 
 export const portfolioProjects = sqliteTable(
@@ -27,8 +28,8 @@ export const portfolioProjects = sqliteTable(
     platforms: text("platforms", { mode: "json" }).$type<string[]>(),
     engines: text("engines", { mode: "json" }).$type<string[]>(),
     sortOrder: integer("sort_order").default(0),
-    createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+    createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+    updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
   },
   (table) => [index("portfolio_projects_portfolio_id_idx").on(table.portfolioId)],
 );

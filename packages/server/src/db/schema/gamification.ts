@@ -1,6 +1,7 @@
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { TIMESTAMP_DEFAULT } from "./column-defaults";
 
 export const gamification = sqliteTable("gamification", {
   id: text("id").primaryKey().default(DEFAULT_PROFILE_ID),
@@ -14,6 +15,6 @@ export const gamification = sqliteTable("gamification", {
   currentStreak: integer("current_streak").default(0),
   lastActiveDate: text("last_active_date"),
   stats: text("stats", { mode: "json" }).$type<Record<string, unknown>>().default(sql`'{}'`),
-  createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+  createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+  updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
 });

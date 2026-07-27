@@ -1,13 +1,13 @@
 import { existsSync, mkdirSync, readdirSync } from "node:fs";
 import { arch, homedir, platform, release } from "node:os";
 import { dirname, resolve } from "node:path";
-import { DEFAULT_DB_PATH_RELATIVE } from "@bao/shared/constants/paths";
 import { resolvePlaywrightChromiumExecutable } from "@bao/shared/utils/playwright-chromium-probe";
 import {
   buildAutomationProcessEnv as buildAutomationProcessEnvFromShared,
   defaultPlaywrightBrowsersPathForPlatform,
   resolvePlaywrightHostPlatformOverride,
 } from "@bao/shared/utils/playwright-browsers-path";
+import { expandHomeDirectory, resolveDatabasePath } from "./database-path";
 import { config } from "./env";
 import { resolveScraperDirectory } from "./scraper-dir-resolve";
 
@@ -20,28 +20,8 @@ type AutomationScriptRunnerConfig = {
  * Shared filesystem path utilities for server runtime and tooling configuration.
  */
 const HOME_DIRECTORY = homedir();
-const TILDE_PREFIX = /^~(?=$|[\\/])/;
 
-/**
- * Expand a path that starts with ~ to the current user home directory.
- */
-export function expandHomeDirectory(pathValue: string): string {
-  return pathValue.trim().replace(TILDE_PREFIX, HOME_DIRECTORY);
-}
-
-/**
- * Resolve a DB path and ensure its parent directory exists.
- */
-export function resolveDatabasePath(rawPath?: string): string {
-  const fallbackPath = resolve(HOME_DIRECTORY, DEFAULT_DB_PATH_RELATIVE);
-  const dbPath = rawPath ? expandHomeDirectory(rawPath) : fallbackPath;
-  const resolvedPath = resolve(dbPath);
-
-  const dbDir = dirname(resolvedPath);
-  mkdirSync(dbDir, { recursive: true });
-
-  return resolvedPath;
-}
+export { expandHomeDirectory, resolveDatabasePath };
 
 /**
  * Resolved DB path for this process (honors `DB_PATH` via env config).

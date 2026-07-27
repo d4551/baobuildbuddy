@@ -1,5 +1,5 @@
 import type { Config } from "drizzle-kit";
-import { resolveDatabasePath } from "./packages/server/src/config/paths";
+import { resolveDatabasePath } from "./packages/server/src/config/database-path";
 
 export default {
   schema: "./packages/server/src/db/schema/schema-modules.ts",

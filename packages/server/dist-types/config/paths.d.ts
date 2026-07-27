@@ -1,15 +1,9 @@
+import { expandHomeDirectory, resolveDatabasePath } from "./database-path";
 type AutomationScriptRunnerConfig = {
     executablePath: string | null;
     entrypointPath: string | null;
 };
-/**
- * Expand a path that starts with ~ to the current user home directory.
- */
-export declare function expandHomeDirectory(pathValue: string): string;
-/**
- * Resolve a DB path and ensure its parent directory exists.
- */
-export declare function resolveDatabasePath(rawPath?: string): string;
+export { expandHomeDirectory, resolveDatabasePath };
 /**
  * Resolved DB path for this process (honors `DB_PATH` via env config).
  * Screenshot artifacts share the same parent directory as the active DB file.
@@ -37,4 +31,3 @@ export declare const buildAutomationProcessEnvFromEnv: (baseEnv?: NodeJS.Process
  * never reports job-apply as configured without a browser to drive.
  */
 export declare const resolveInstalledChromiumExecutable: () => string | null;
-export {};

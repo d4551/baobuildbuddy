@@ -2,9 +2,9 @@ import { COUNT_FIFTY } from "@bao/shared/constants/numeric";
 import type { SkillEvidence } from "@bao/shared/types/skill-mapping";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { TIMESTAMP_DEFAULT } from "./column-defaults";
 
 const EMPTY_JSON_ARRAY = sql`'[]'`;
-const CURRENT_TIMESTAMP = sql`(CURRENT_TIMESTAMP)`;
 
 export const skillMappings = sqliteTable("skill_mappings", {
   id: text("id").primaryKey(),
@@ -18,6 +18,6 @@ export const skillMappings = sqliteTable("skill_mappings", {
   category: text("category"),
   demandLevel: text("demand_level").default("medium"),
   aiGenerated: integer("ai_generated", { mode: "boolean" }).default(false),
-  createdAt: text("created_at").notNull().default(CURRENT_TIMESTAMP),
-  updatedAt: text("updated_at").notNull().default(CURRENT_TIMESTAMP),
+  createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+  updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
 });

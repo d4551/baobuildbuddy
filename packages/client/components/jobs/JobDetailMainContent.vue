@@ -51,11 +51,14 @@ const { t } = useI18n();
   <div class="lg:col-span-2" :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <div :class="SURFACE_GLASS_CARD_CLASS">
       <div class="card-body">
+        <!-- Hero sits in the narrow grid column beside the job sidebar; three shrink-0
+             actions leave a job title under a third of the header without stacking. -->
         <PageHeroHeader
           :title-id="titleId"
           :title="job.title"
           :description="heroDescription"
           density="comfortable"
+          stack-header
         >
           <template #actions>
             <button type="button"

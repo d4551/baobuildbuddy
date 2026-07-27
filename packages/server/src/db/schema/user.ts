@@ -1,6 +1,7 @@
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { TIMESTAMP_DEFAULT } from "./column-defaults";
 
 export const userRole = sqliteTable("user_role", {
   id: text("id").primaryKey().default(DEFAULT_PROFILE_ID),
@@ -28,6 +29,6 @@ export const userProfile = sqliteTable("user_profile", {
   careerGoals: text("career_goals", { mode: "json" })
     .$type<Record<string, unknown>>()
     .default(sql`'{}'`),
-  createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+  createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+  updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
 });

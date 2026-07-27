@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { TIMESTAMP_DEFAULT } from "./column-defaults";
 
 export const interviewSessions = sqliteTable(
   "interview_sessions",
@@ -13,8 +14,8 @@ export const interviewSessions = sqliteTable(
     status: text("status").default("preparing"),
     startTime: integer("start_time"),
     endTime: integer("end_time"),
-    createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+    createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+    updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
   },
   (table) => [index("interview_sessions_studio_id_idx").on(table.studioId)],
 );

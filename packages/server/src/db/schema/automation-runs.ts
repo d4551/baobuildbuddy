@@ -1,6 +1,6 @@
 import type { JsonObject } from "@bao/shared/utils/json";
-import { sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { TIMESTAMP_DEFAULT } from "./column-defaults";
 
 /**
  * Persisted audit trail for automation run execution and output.
@@ -25,6 +25,6 @@ export const automationRuns = sqliteTable("automation_runs", {
   executionMs: integer("execution_ms"),
   startedAt: text("started_at"),
   completedAt: text("completed_at"),
-  createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+  createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+  updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
 });

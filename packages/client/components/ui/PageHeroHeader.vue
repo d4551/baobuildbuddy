@@ -17,12 +17,19 @@ const props = withDefaults(
     headingTag?: PageHeroHeadingTag;
     descriptionClass?: string;
     density?: PageHeroDensity;
+    /**
+     * Force the title onto its own line. `hasAside` covers heroes that surrender part of
+     * their row to an aside; a hero rendered inside an already-narrow grid column has the
+     * same problem from the page's layout instead, and only the consumer knows that.
+     */
+    stackHeader?: boolean;
   }>(),
   {
     description: "",
     headingTag: "h1",
     descriptionClass: "",
     density: "compact",
+    stackHeader: false,
   },
 );
 
@@ -34,6 +41,7 @@ const heroContentClass = computed(() =>
     : PAGE_HERO_CONTENT_COMPACT_CLASS,
 );
 const hasAside = computed(() => Boolean(slots.aside));
+const stacksHeader = computed(() => props.stackHeader || hasAside.value);
 </script>
 
 <template>
@@ -45,6 +53,7 @@ const hasAside = computed(() => Boolean(slots.aside));
         :description="description"
         :heading-tag="headingTag"
         :description-class="descriptionClass"
+        :stacked="stacksHeader"
       >
         <template v-if="$slots.actions" #actions>
           <slot name="actions" />

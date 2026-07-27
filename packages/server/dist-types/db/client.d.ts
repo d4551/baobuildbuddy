@@ -161,12 +161,12 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
         dialect: 'sqlite';
     }>;
     auditLog: import("drizzle-orm/sqlite-core").SQLiteTableWithColumns<{
-        name: "audit-log";
+        name: "audit_log";
         schema: undefined;
         columns: {
             id: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "id";
-                tableName: "audit-log";
+                tableName: "audit_log";
                 dataType: "number";
                 columnType: "SQLiteInteger";
                 data: number;
@@ -183,7 +183,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
             }, {}, {}>;
             event: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "event";
-                tableName: "audit-log";
+                tableName: "audit_log";
                 dataType: "string";
                 columnType: "SQLiteText";
                 data: string;
@@ -202,7 +202,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
             }>;
             actor: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "actor";
-                tableName: "audit-log";
+                tableName: "audit_log";
                 dataType: "string";
                 columnType: "SQLiteText";
                 data: string;
@@ -221,7 +221,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
             }>;
             detail: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "detail";
-                tableName: "audit-log";
+                tableName: "audit_log";
                 dataType: "string";
                 columnType: "SQLiteText";
                 data: string;
@@ -240,7 +240,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
             }>;
             ip: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "ip";
-                tableName: "audit-log";
+                tableName: "audit_log";
                 dataType: "string";
                 columnType: "SQLiteText";
                 data: string;
@@ -259,7 +259,7 @@ export declare const db: import("drizzle-orm/bun-sqlite").BunSQLiteDatabase<{
             }>;
             createdAt: import("drizzle-orm/sqlite-core").SQLiteColumn<{
                 name: "created_at";
-                tableName: "audit-log";
+                tableName: "audit_log";
                 dataType: "string";
                 columnType: "SQLiteText";
                 data: string;

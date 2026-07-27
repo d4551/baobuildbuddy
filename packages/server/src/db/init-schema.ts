@@ -13,6 +13,7 @@ import {
   DEFAULT_PROFILE_ID,
   DEFAULT_SETTINGS_ID,
 } from "@bao/shared/types/settings-defaults";
+import { TIMESTAMP_DEFAULT_SQL } from "./schema/column-defaults";
 
 const escapeSqlString = (value: string): string => value.replaceAll("'", "''");
 const DEFAULT_BRAND_SETTINGS_SQL = escapeSqlString(JSON.stringify(DEFAULT_BRAND_SETTINGS));
@@ -45,8 +46,8 @@ export const TABLE_DEFINITIONS = [
       soft_skills TEXT DEFAULT '[]',
       gaming_experience TEXT DEFAULT '{}',
       career_goals TEXT DEFAULT '{}',
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS settings (
       id TEXT PRIMARY KEY DEFAULT '${DEFAULT_SETTINGS_ID}',
@@ -67,8 +68,8 @@ export const TABLE_DEFINITIONS = [
       automation_settings TEXT DEFAULT '${DEFAULT_AUTOMATION_SETTINGS_SQL}',
       email_transport_settings TEXT DEFAULT '${DEFAULT_EMAIL_TRANSPORT_SETTINGS_SQL}',
       email_transport_password TEXT,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS auth (
       id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
@@ -87,7 +88,7 @@ export const TABLE_DEFINITIONS = [
       actor TEXT,
       detail TEXT,
       ip TEXT,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS jobs (
       id TEXT PRIMARY KEY,
@@ -113,8 +114,8 @@ export const TABLE_DEFINITIONS = [
       company_logo TEXT,
       application_url TEXT,
       enrichment TEXT,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS saved_jobs (
       id TEXT PRIMARY KEY,
@@ -128,8 +129,8 @@ export const TABLE_DEFINITIONS = [
       applied_date TEXT NOT NULL,
       notes TEXT DEFAULT '',
       timeline TEXT DEFAULT '[]',
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS resumes (
       id TEXT PRIMARY KEY,
@@ -144,8 +145,8 @@ export const TABLE_DEFINITIONS = [
       template TEXT DEFAULT '${escapeSqlString(RESUME_TEMPLATE_DEFAULT)}',
       theme TEXT DEFAULT '${escapeSqlString(RESUME_DEFAULT_THEME)}',
       is_default INTEGER DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS cover_letters (
       id TEXT PRIMARY KEY,
@@ -154,14 +155,14 @@ export const TABLE_DEFINITIONS = [
       job_info TEXT,
       content TEXT DEFAULT '{}',
       template TEXT DEFAULT '${escapeSqlString(COVER_LETTER_DEFAULT_TEMPLATE)}',
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS portfolios (
       id TEXT PRIMARY KEY,
       metadata TEXT,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS portfolio_projects (
       id TEXT PRIMARY KEY,
@@ -178,8 +179,8 @@ export const TABLE_DEFINITIONS = [
       platforms TEXT,
       engines TEXT,
       sort_order INTEGER DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS interview_sessions (
       id TEXT PRIMARY KEY,
@@ -191,8 +192,8 @@ export const TABLE_DEFINITIONS = [
       status TEXT DEFAULT 'preparing',
       start_time INTEGER,
       end_time INTEGER,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS studios (
       id TEXT PRIMARY KEY,
@@ -209,8 +210,8 @@ export const TABLE_DEFINITIONS = [
       interview_style TEXT,
       remote_work INTEGER,
       enrichment TEXT,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS gamification (
       id TEXT PRIMARY KEY DEFAULT '${DEFAULT_PROFILE_ID}',
@@ -222,8 +223,8 @@ export const TABLE_DEFINITIONS = [
       current_streak INTEGER DEFAULT 0,
       last_active_date TEXT,
       stats TEXT DEFAULT '{}',
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS skill_mappings (
       id TEXT PRIMARY KEY,
@@ -235,8 +236,8 @@ export const TABLE_DEFINITIONS = [
       category TEXT,
       demand_level TEXT DEFAULT 'medium',
       ai_generated INTEGER DEFAULT 0,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS chat_history (
       id TEXT PRIMARY KEY,
@@ -244,7 +245,7 @@ export const TABLE_DEFINITIONS = [
       content TEXT NOT NULL,
       timestamp TEXT NOT NULL,
       session_id TEXT,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS automation_runs (
       id TEXT PRIMARY KEY,
@@ -265,8 +266,8 @@ export const TABLE_DEFINITIONS = [
       execution_ms INTEGER,
       started_at TEXT,
       completed_at TEXT,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS job_taxonomy_keywords (
       id TEXT PRIMARY KEY,
@@ -275,8 +276,8 @@ export const TABLE_DEFINITIONS = [
       synonyms TEXT NOT NULL DEFAULT '[]',
       sort_order INTEGER NOT NULL DEFAULT 0,
       enabled INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
   `CREATE TABLE IF NOT EXISTS studio_classification_rules (
       id TEXT PRIMARY KEY,
@@ -284,8 +285,8 @@ export const TABLE_DEFINITIONS = [
       keyword TEXT NOT NULL,
       sort_order INTEGER NOT NULL DEFAULT 0,
       enabled INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-      updated_at TEXT NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+      created_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL},
+      updated_at TEXT NOT NULL DEFAULT ${TIMESTAMP_DEFAULT_SQL}
     )`,
 ] as const;
 

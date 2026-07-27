@@ -1,6 +1,7 @@
 import type { ApplicationTimelineEntry, ScrapePersonaEnrichment } from "@bao/shared/types/jobs";
 import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, unique, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { TIMESTAMP_DEFAULT } from "./column-defaults";
 
 export const jobs = sqliteTable(
   "jobs",
@@ -28,8 +29,8 @@ export const jobs = sqliteTable(
     companyLogo: text("company_logo"),
     applicationUrl: text("application_url"),
     enrichment: text("enrichment", { mode: "json" }).$type<ScrapePersonaEnrichment>(),
-    createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+    createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+    updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
   },
   (table) => [
     index("jobs_source_idx").on(table.source),
@@ -66,8 +67,8 @@ export const applications = sqliteTable(
     timeline: text("timeline", { mode: "json" })
       .$type<ApplicationTimelineEntry[]>()
       .default(sql`'[]'`),
-    createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+    createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+    updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
   },
   (table) => [
     index("applications_job_id_idx").on(table.jobId),

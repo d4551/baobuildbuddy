@@ -11,8 +11,17 @@ import { writeError, writeOutput } from "./utils/cli-output";
 const packages = ["shared", "scraper", "server", "client"] as const;
 const tscBin = join(process.cwd(), "node_modules", "@typescript", "native", "bin", "tsc");
 
-const packageResults = packages.map((pkg) => {
-  const cwd = join(process.cwd(), "packages", pkg);
+/**
+ * The root project owns `scripts/**` and `drizzle.config.ts`. Only the four packages were
+ * checked, so every validator, proof, and build script sat outside the type gate — an
+ * unimported symbol there surfaced (if at all) as a vague type-aware lint error rather than
+ * a compile failure. Root is checked as a peer of the packages.
+ */
+const ROOT_PROJECT = "root" as const;
+const typecheckTargets = [ROOT_PROJECT, ...packages] as const;
+
+const packageResults = typecheckTargets.map((pkg) => {
+  const cwd = pkg === ROOT_PROJECT ? process.cwd() : join(process.cwd(), "packages", pkg);
   // Client typecheck self-bootstraps Nuxt + server generated types; use package script.
   const result =
     pkg === "client"

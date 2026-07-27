@@ -2,7 +2,14 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["bun-types"]
+    "types": ["bun-types"],
+    // Validators and browser proofs import client constants directly, and those files use
+    // Nuxt's `~` alias internally. Only the generated client tsconfig maps it, so without
+    // this the root project cannot resolve them.
+    "paths": {
+      "~/*": ["./packages/client/*"],
+      "~~/*": ["./packages/client/*"]
+    }
   },
   "include": ["drizzle.config.ts", "scripts/**/*.ts"]
 }

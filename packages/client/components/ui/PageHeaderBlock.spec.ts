@@ -94,6 +94,36 @@ describe("PageHeaderBlock actions", () => {
   });
 });
 
+describe("PageHeaderBlock stacking", () => {
+  /**
+   * Title and actions share a row by default. Where the header is already narrowed — by a
+   * hero aside, or by the page grid column it sits in — a `shrink-0` actions row makes the
+   * title absorb the whole shortfall: the job detail `h1` rendered at 80px over four lines.
+   */
+  it("puts the title beside the actions by default", async () => {
+    const wrapper = await mountHeader({ description: DESCRIPTION });
+
+    expect(wrapper.find("header").classes()).toContain("sm:flex-row");
+  });
+
+  it("keeps the title on its own line when stacked", async () => {
+    const wrapper = await mountHeader({ description: DESCRIPTION, stacked: true });
+    const header = wrapper.find("header");
+
+    expect(header.classes()).toContain("flex-col");
+    expect(header.classes()).not.toContain("sm:flex-row");
+  });
+
+  it("still renders actions when stacked", async () => {
+    const wrapper = await mountHeader(
+      { description: DESCRIPTION, stacked: true },
+      "<button>Apply Now</button>",
+    );
+
+    expect(wrapper.find("button").text()).toBe("Apply Now");
+  });
+});
+
 describe("PageHeaderBlock lead column sizing", () => {
   /**
    * The lead column carries no grow and sits beside a `shrink-0` actions row, so at

@@ -3,6 +3,7 @@ import {
   FLEX_GAP_TOKEN_CLASS,
   PAGE_HEADER_DESCRIPTION_CLASS,
   PAGE_HEADER_OUTER_CLASS,
+  PAGE_HEADER_OUTER_STACKED_CLASS,
   PAGE_HEADER_TITLE_CLASS,
 } from "~/constants/layout";
 
@@ -15,12 +16,23 @@ const props = withDefaults(
     description?: string;
     headingTag?: HeadingTag;
     descriptionClass?: string;
+    /**
+     * Keep the title and actions on separate lines. Callers whose header shares a row with
+     * a hero aside set this: the header only gets what the aside leaves, and a `shrink-0`
+     * actions row makes the title absorb the whole shortfall.
+     */
+    stacked?: boolean;
   }>(),
   {
     description: "",
     headingTag: "h1",
     descriptionClass: "",
+    stacked: false,
   },
+);
+
+const outerClass = computed(() =>
+  props.stacked ? PAGE_HEADER_OUTER_STACKED_CLASS : PAGE_HEADER_OUTER_CLASS,
 );
 
 const hasActions = computed(() => Boolean(useSlots().actions));
@@ -30,7 +42,7 @@ const resolvedDescriptionClass = computed(() =>
 </script>
 
 <template>
-  <header :class="PAGE_HEADER_OUTER_CLASS">
+  <header :class="outerClass">
     <div class="min-w-0">
       <component :is="headingTag" :id="titleId" :class="PAGE_HEADER_TITLE_CLASS">
         {{ title }}

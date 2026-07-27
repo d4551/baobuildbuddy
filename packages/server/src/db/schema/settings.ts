@@ -18,6 +18,7 @@ import {
 } from "@bao/shared/types/settings-defaults";
 import { sql } from "drizzle-orm";
 import { sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { TIMESTAMP_DEFAULT } from "./column-defaults";
 
 export const settings = sqliteTable("settings", {
   id: text("id").primaryKey().default(DEFAULT_SETTINGS_ID),
@@ -51,8 +52,8 @@ export const settings = sqliteTable("settings", {
       sql.raw(`'${JSON.stringify(DEFAULT_EMAIL_TRANSPORT_SETTINGS).replaceAll("'", "''")}'`),
     ),
   emailTransportPassword: text("email_transport_password"),
-  createdAt: text("created_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at").notNull().default(sql`(CURRENT_TIMESTAMP)`),
+  createdAt: text("created_at").notNull().default(TIMESTAMP_DEFAULT),
+  updatedAt: text("updated_at").notNull().default(TIMESTAMP_DEFAULT),
 });
 
 export { DEFAULT_SETTINGS_ID };
