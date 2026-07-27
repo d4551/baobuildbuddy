@@ -3,6 +3,7 @@ import type { ChatMessage } from "@bao/shared/types/ai";
 import {
   MIN_HEIGHT_ZERO_CLASS,
   SHADOW_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
 } from "~/constants/layout";
 
 defineProps<{
@@ -65,10 +66,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <section
-    class="card border border-base-300 bg-base-100"
-    :class="[MIN_HEIGHT_ZERO_CLASS, SHADOW_TOKEN_CLASS.sm]"
-  >
+  <section :class="[SURFACE_GLASS_CARD_CLASS, MIN_HEIGHT_ZERO_CLASS, SHADOW_TOKEN_CLASS.sm]">
     <div class="flex flex-1 flex-col" :class="[MIN_HEIGHT_ZERO_CLASS]">
       <AIChatConversationHeader
         :brand-name="resolvedBrand.name"

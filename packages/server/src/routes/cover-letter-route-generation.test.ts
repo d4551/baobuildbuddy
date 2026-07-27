@@ -2,6 +2,7 @@ import { afterEach, beforeAll, describe, expect, spyOn, test } from "bun:test";
 import { API_ERROR_COVER_LETTER_GENERATION_FAILED } from "@bao/shared/constants/api-errors";
 import { HTTP_STATUS_INTERNAL_SERVER_ERROR } from "@bao/shared/constants/http";
 import type { AIResponse } from "@bao/shared/types/ai";
+import { REDACTED_SECRET_PLACEHOLDER } from "@bao/shared/utils/secret-redaction";
 import { db, sqlite } from "../db/client";
 import { initializeDatabase } from "../db/init";
 import { jobs } from "../db/schema/jobs";
@@ -210,6 +211,36 @@ describe("handleGenerateCoverLetter secret hygiene", () => {
     expect(result).toEqual({ error: API_ERROR_COVER_LETTER_GENERATION_FAILED });
     expect(JSON.stringify(result)).not.toContain(leakedSecret);
     expect(JSON.stringify(result)).not.toContain("Invalid API key");
+  });
+
+  /**
+   * The client response was already scrubbed, but the structured log kept the raw
+   * provider message — so a rejected generation wrote a live key to stdout at
+   * error level. Asserting the response alone let that through, so the log stream
+   * is captured and asserted here too.
+   */
+  test("AI generation failures omit provider secrets from the structured log", async () => {
+    const leakedSecret = "sk-proj-LEAKED_PROVIDER_SECRET_VALUE";
+    const service = AIService.fromSettings(undefined);
+    trackSpy(spyOn(service, "generate")).mockRejectedValue(
+      new Error(`All providers failed to generate: openai: Invalid API key ${leakedSecret}`),
+    );
+    trackSpy(spyOn(AIService, "fromSettings")).mockReturnValue(service);
+
+    const captured: string[] = [];
+    const stdoutSpy = spyOn(process.stdout, "write").mockImplementation((chunk) => {
+      captured.push(typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk));
+      return true;
+    });
+
+    const set: RouteSetState = { status: 200 };
+    await handleGenerateCoverLetter({ company: "Studio Hash", position: "Gameplay Engineer" }, set);
+    stdoutSpy.mockRestore();
+
+    const logStream = captured.join("");
+    expect(logStream).toContain("Cover letter AI generation rejected");
+    expect(logStream).not.toContain(leakedSecret);
+    expect(logStream).toContain(REDACTED_SECRET_PLACEHOLDER);
   });
 
   registerPromptContextTests();

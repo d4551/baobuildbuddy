@@ -22,6 +22,29 @@ Requirements:
 5. Return only the reply body text with no markdown or analysis.`;
 }
 
+function buildEnrichmentBlock(enrichment?: {
+  summary?: string;
+  hiringSignals?: string[];
+  interviewFocusAreas?: string[];
+  candidatePitchAngles?: string[];
+}): string {
+  if (!enrichment) return "";
+  const sections: string[] = [];
+  if (enrichment.summary) {
+    sections.push(`Studio summary: ${enrichment.summary}`);
+  }
+  if (enrichment.hiringSignals && enrichment.hiringSignals.length > 0) {
+    sections.push(`Hiring signals: ${enrichment.hiringSignals.join(", ")}`);
+  }
+  if (enrichment.interviewFocusAreas && enrichment.interviewFocusAreas.length > 0) {
+    sections.push(`Interview focus areas: ${enrichment.interviewFocusAreas.join(", ")}`);
+  }
+  if (enrichment.candidatePitchAngles && enrichment.candidatePitchAngles.length > 0) {
+    sections.push(`Candidate pitch angles: ${enrichment.candidatePitchAngles.join(", ")}`);
+  }
+  return sections.length > 0 ? `\n\nScraped enrichment:\n${sections.join("\n")}` : "";
+}
+
 /**
  * Job match analysis prompt
  */
@@ -45,29 +68,7 @@ export function jobMatchPrompt(
     job.technologies && job.technologies.length > 0
       ? `\nTechnologies: ${job.technologies.join(", ")}`
       : "";
-  const enrichmentSections: string[] = [];
-  if (job.enrichment) {
-    if (job.enrichment.summary) {
-      enrichmentSections.push(`Studio summary: ${job.enrichment.summary}`);
-    }
-    if (job.enrichment.hiringSignals && job.enrichment.hiringSignals.length > 0) {
-      enrichmentSections.push(`Hiring signals: ${job.enrichment.hiringSignals.join(", ")}`);
-    }
-    if (job.enrichment.interviewFocusAreas && job.enrichment.interviewFocusAreas.length > 0) {
-      enrichmentSections.push(
-        `Interview focus areas: ${job.enrichment.interviewFocusAreas.join(", ")}`,
-      );
-    }
-    if (job.enrichment.candidatePitchAngles && job.enrichment.candidatePitchAngles.length > 0) {
-      enrichmentSections.push(
-        `Candidate pitch angles: ${job.enrichment.candidatePitchAngles.join(", ")}`,
-      );
-    }
-  }
-  const enrichmentBlock =
-    enrichmentSections.length > 0
-      ? `\n\nScraped enrichment:\n${enrichmentSections.join("\n")}`
-      : "";
+  const enrichmentBlock = buildEnrichmentBlock(job.enrichment);
   return `Analyze how well this candidate matches this game industry job opportunity.
 
 Candidate Profile:

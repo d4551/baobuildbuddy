@@ -38,7 +38,7 @@ defineProps<{
             </svg>
           </div>
         </div>
-        <div :class="[STAT_CARD_CTA_ROW_CLASS, statCard.accentClass]">
+        <div :class="STAT_CARD_CTA_ROW_CLASS">
           <span>{{ statCard.ctaLabel }}</span>
           <svg 
             xmlns="http://www.w3.org/2000/svg"

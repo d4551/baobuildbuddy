@@ -30,6 +30,25 @@ type GrackleEvaluateArgs = {
  * @param sourceUrl Canonical source URL supplied by settings.
  * @returns Normalized job rows.
  */
+const mapGrackleRowsToJobs = (rows: GrackleCandidate[], sourceUrl: string): ScrapedJob[] =>
+  rows.slice(0, GRACKLE_RESULT_LIMIT).map((row) => {
+    const title = toBoundedText(row.title, SCRAPED_JOB_TITLE_MAX_LENGTH);
+    const company = toBoundedText(row.company, SCRAPED_JOB_COMPANY_MAX_LENGTH) || "Unknown";
+    const location = toBoundedText(row.location, SCRAPED_JOB_LOCATION_MAX_LENGTH) || "Remote";
+
+    return {
+      title,
+      company,
+      location,
+      remote: normalizeWhitespace(location).toLowerCase().includes("remote"),
+      description: "",
+      url: toAbsoluteUrl(sourceUrl, row.href || sourceUrl),
+      source: "grackle",
+      postedDate: "",
+      contentHash: buildScraperHash("grackle", [title, company, location]),
+    };
+  });
+
 export const extractGrackleJobs = async (
   page: PageEvaluator,
   sourceUrl: string,
@@ -76,21 +95,5 @@ export const extractGrackleJobs = async (
     },
   );
 
-  return rows.slice(0, GRACKLE_RESULT_LIMIT).map((row) => {
-    const title = toBoundedText(row.title, SCRAPED_JOB_TITLE_MAX_LENGTH);
-    const company = toBoundedText(row.company, SCRAPED_JOB_COMPANY_MAX_LENGTH) || "Unknown";
-    const location = toBoundedText(row.location, SCRAPED_JOB_LOCATION_MAX_LENGTH) || "Remote";
-
-    return {
-      title,
-      company,
-      location,
-      remote: normalizeWhitespace(location).toLowerCase().includes("remote"),
-      description: "",
-      url: toAbsoluteUrl(sourceUrl, row.href || sourceUrl),
-      source: "grackle",
-      postedDate: "",
-      contentHash: buildScraperHash("grackle", [title, company, location]),
-    };
-  });
+  return mapGrackleRowsToJobs(rows, sourceUrl);
 };

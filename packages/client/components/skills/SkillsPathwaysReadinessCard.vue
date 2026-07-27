@@ -11,6 +11,7 @@ import {
   PADDING_TOKEN_CLASS,
   RADIAL_METER_GEOMETRY,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_ACCENT_GRADIENT_PANEL_CLASS,
   TRACKING_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
@@ -36,9 +37,9 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <section 
+  <section
     v-if="readinessAssessment"
-    class="card card-border bg-linear-to-br from-primary to-secondary text-on-primary"
+    :class="SURFACE_ACCENT_GRADIENT_PANEL_CLASS"
   >
     <div class="card-body" :class="[FLEX_GAP_TOKEN_CLASS.gap4]">
       <h2 class="card-title" :class="[TYPOGRAPHY_SCALE_CLASS.xl2]">{{ t("skillsPathwaysPage.readiness.title") }}</h2>

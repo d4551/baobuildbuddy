@@ -7,7 +7,7 @@ import {
 import { A4_PAGE_HEIGHT, A4_PAGE_SIZE, A4_PAGE_WIDTH } from "@bao/shared/constants/export-layout";
 import type { ResumePdfThemeConfig } from "@bao/shared/constants/export-resume-theme";
 import type { ResumeData } from "@bao/shared/types/resume";
-import { type Color, type PDFDocument, type PDFFont, type PDFPage, rgb } from "pdf-lib";
+import { type Color, type PDFDocument, type PDFFont, type PDFPage, rgb as pdfRgb } from "pdf-lib";
 
 export interface RGB {
   r: number;
@@ -55,10 +55,18 @@ export interface ResumeSkillGroupOptions {
   trailingGap: number;
 }
 
+export interface CoverLetterContentSections {
+  introduction?: string;
+  body?: string;
+  conclusion?: string;
+}
+
+export type CoverLetterContent = string | CoverLetterContentSections;
+
 export interface CoverLetterPayload {
   company: string;
   position: string;
-  content: unknown;
+  content: CoverLetterContent;
   template?: string;
 }
 
@@ -117,7 +125,7 @@ export interface PortfolioRenderContext {
   layout: PortfolioExportLayout;
 }
 
-const toStaticPdfColor = (color: RGB): Color => rgb(color.r, color.g, color.b);
+const toStaticPdfColor = (color: RGB): Color => pdfRgb(color.r, color.g, color.b);
 
 export const toCoverLetterPdfColors = (template?: string | null): CoverLetterPdfColors => {
   const palette = resolveCoverLetterPdfPalette(template);
@@ -146,6 +154,6 @@ export const toPortfolioPdfColors = (template?: string | null): PortfolioPdfColo
 };
 
 export const addA4Page = (pdfDoc: PDFDocument): PDFPage => pdfDoc.addPage([...A4_PAGE_SIZE]);
-export const toPdfColor = (color: RGB): Color => rgb(color.r, color.g, color.b);
+export const toPdfColor = (color: RGB): Color => pdfRgb(color.r, color.g, color.b);
 
 export { A4_PAGE_HEIGHT, A4_PAGE_WIDTH };

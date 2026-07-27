@@ -3,6 +3,7 @@ import {
   API_ERROR_INVALID_API_KEY,
   API_ERROR_MISSING_AUTH_HEADER,
 } from "@bao/shared/constants/api-errors";
+import { isSetupPreBootstrapEndpoint } from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
@@ -66,6 +67,38 @@ function readCredential(request: Request): CredentialRead {
 }
 
 /**
+ * Reads the persisted auth row for the default profile.
+ */
+async function readAuthRow(): Promise<typeof auth.$inferSelect | undefined> {
+  const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+  return rows[0];
+}
+
+/**
+ * Reports whether the instance has been bootstrapped with an API key hash.
+ *
+ * Bootstrapped state is read from the database rather than trusted from the
+ * request, so a caller cannot claim first-run status to skip authentication.
+ */
+async function hasProvisionedApiKey(): Promise<boolean> {
+  const row = await readAuthRow();
+  return Boolean(row?.apiKeyHash);
+}
+
+/**
+ * Reports whether a request targets a first-run setup endpoint.
+ *
+ * @param request Incoming request.
+ * @returns True when the method/path pair is on the pre-bootstrap allowlist.
+ */
+function isSetupPreBootstrapRequest(request: Request): boolean {
+  if (!URL.canParse(request.url)) {
+    return false;
+  }
+  return isSetupPreBootstrapEndpoint(request.method, new URL(request.url).pathname);
+}
+
+/**
  * Validates an API key credential against the persisted SHA-256 hash.
  *
  * The credential is read from the `Authorization: Bearer` header first; when
@@ -77,9 +110,22 @@ function readCredential(request: Request): CredentialRead {
  * compares it against the stored hash using `timingSafeEqual`.
  *
  * Keys are checked for revocation and expiry before hash comparison.
+ *
+ * One exception exists: while the instance holds no API key hash, the endpoints
+ * in `SETUP_PREBOOTSTRAP_ENDPOINTS` answer without a credential so the first-run
+ * setup wizard can test provider connectivity. Bootstrapped state is read from
+ * the database, so the grace closes as soon as a key is provisioned.
  */
 export async function authenticateApiKey(request: Request): Promise<AuthFailure | null> {
   if (isAuthDisabled()) {
+    return null;
+  }
+
+  // First-run grace: the setup wizard runs before any API key exists, so its
+  // allowlisted endpoints must answer while the instance is un-bootstrapped.
+  // The grace is checked against the database and closes the moment a hash is
+  // stored, so it never widens access on a configured instance.
+  if (isSetupPreBootstrapRequest(request) && !(await hasProvisionedApiKey())) {
     return null;
   }
 
@@ -98,8 +144,7 @@ export async function authenticateApiKey(request: Request): Promise<AuthFailure 
     }
   }
 
-  const rows = await db.select().from(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
-  const row = rows[0];
+  const row = await readAuthRow();
   const storedHash = row?.apiKeyHash;
   if (!storedHash) {
     return { error: API_ERROR_INVALID_API_KEY, status: HTTP_STATUS_UNAUTHORIZED };

@@ -25,13 +25,18 @@ import {
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
 import { reportFindingsAndExit } from "./utils/proof-findings";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
-);
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
 const OUT =
-  process.env.DOM_REACTIVITY_OUT ?? "/opt/cursor/artifacts/live-capabilities/dom-reactivity";
+  resolveProofOutDir(
+  "DOM_REACTIVITY_OUT",
+  artifactDir("live-capabilities", "dom-reactivity"),
+);
 
 const RE_EDIT_RESUME = /Edit resume/i;
 const RE_SEARCH = /Search|Omni|workspace search/i;

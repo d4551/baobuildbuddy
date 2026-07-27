@@ -28,21 +28,9 @@ type WorkWithIndiesCandidate = {
  * @param sourceUrl Canonical source URL supplied by settings.
  * @returns Normalized job rows.
  */
-export const extractWorkWithIndiesJobs = async (
-  page: PageEvaluator,
-  sourceUrl: string,
-): Promise<ScrapedJob[]> => {
-  const rows = await page.evaluate((resultLimit) => {
-    const cards = Array.from(
-      document.querySelectorAll<HTMLAnchorElement>("a.job-card, a[href*='/careers/']"),
-    );
-
-    return cards.slice(0, resultLimit).map((card) => ({
-      text: (card.innerText ?? "").replaceAll("\n", " ").trim(),
-      href: card.getAttribute("href") ?? "",
-    }));
-  }, WORK_WITH_INDIES_RESULT_LIMIT);
-
+const filterWorkWithIndiesCandidates = (
+  rows: Array<{ text: string; href: string }>,
+): WorkWithIndiesCandidate[] => {
   const candidates: WorkWithIndiesCandidate[] = [];
 
   for (const row of rows) {
@@ -67,13 +55,28 @@ export const extractWorkWithIndiesJobs = async (
       continue;
     }
 
-    candidates.push({
-      company,
-      title,
-      location,
-      href: row.href,
-    });
+    candidates.push({ company, title, location, href: row.href });
   }
+
+  return candidates;
+};
+
+export const extractWorkWithIndiesJobs = async (
+  page: PageEvaluator,
+  sourceUrl: string,
+): Promise<ScrapedJob[]> => {
+  const rows = await page.evaluate((resultLimit) => {
+    const cards = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>("a.job-card, a[href*='/careers/']"),
+    );
+
+    return cards.slice(0, resultLimit).map((card) => ({
+      text: (card.innerText ?? "").replaceAll("\n", " ").trim(),
+      href: card.getAttribute("href") ?? "",
+    }));
+  }, WORK_WITH_INDIES_RESULT_LIMIT);
+
+  const candidates = filterWorkWithIndiesCandidates(rows);
 
   return candidates.slice(0, WORK_WITH_INDIES_RESULT_LIMIT).map((row) => {
     const title = toBoundedText(row.title, SCRAPED_JOB_TITLE_MAX_LENGTH);

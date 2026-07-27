@@ -15,13 +15,13 @@ import {
   tourRoute,
   waitForPageReady,
 } from "./browser-record-visual-proof-helpers";
+import { artifactDir, resolveProofClientBase, resolveProofOutDir } from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://localhost:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://localhost:3001");
+const OUT_DIR = resolveProofOutDir(
+  "BROWSER_PROOF_OUT",
+  artifactDir("baseline", "browser-video-proof"),
 );
-const OUT_DIR =
-  process.env.BROWSER_PROOF_OUT ?? join("/opt/cursor/artifacts/baseline/browser-video-proof");
 
 const ROUTES: readonly { readonly slug: string; readonly path: string }[] = [
   { slug: "dashboard", path: APP_ROUTES.dashboard },

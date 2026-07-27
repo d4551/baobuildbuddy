@@ -226,6 +226,39 @@ export const waitForRunCompletion = async (
   return lastRun;
 };
 
+const openAutomationSocket = async (runId: string): Promise<WebSocket> => {
+  const { WS_ENDPOINTS } = await import("@bao/shared/constants/endpoints");
+  const socket = new WebSocket(websocketBaseUrl + WS_ENDPOINTS.automation);
+
+  await new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(
+      () => reject(new Error("Timed out opening automation websocket")),
+      MS_FIVE_SECONDS,
+    );
+    socket.addEventListener("open", () => {
+      clearTimeout(timeout);
+      socket.send(JSON.stringify({ type: "subscribe", runId }));
+      resolve();
+    });
+    socket.addEventListener("error", () => {
+      clearTimeout(timeout);
+      reject(new Error("Automation websocket failed to open"));
+    });
+  });
+
+  return socket;
+};
+
+const isTerminalRunEvent = (runEvent: RpaRunEvent): boolean => {
+  if (
+    runEvent.eventType === "progress" &&
+    (runEvent.status === "success" || runEvent.status === "error")
+  ) {
+    return true;
+  }
+  return runEvent.eventType === "result" || runEvent.eventType === "error";
+};
+
 export const subscribeToRunEvents = async (
   runId: string,
 ): Promise<{
@@ -233,26 +266,9 @@ export const subscribeToRunEvents = async (
   close(): void;
   waitForTerminalEvent(): Promise<RpaRunEvent>;
 }> => {
-  const { WS_ENDPOINTS } = await import("@bao/shared/constants/endpoints");
-  const socket = new WebSocket(websocketBaseUrl + WS_ENDPOINTS.automation);
+  const socket = await openAutomationSocket(runId);
   const events: RpaRunEvent[] = [];
   let terminalEvent: RpaRunEvent | null = null;
-
-  await new Promise<void>((resolve, reject) => {
-    const timeout = setTimeout(
-      () => reject(new Error("Timed out opening automation websocket")),
-      MS_FIVE_SECONDS,
-    );
-    socket.onopen = () => {
-      clearTimeout(timeout);
-      socket.send(JSON.stringify({ type: "subscribe", runId }));
-      resolve();
-    };
-    socket.onerror = () => {
-      clearTimeout(timeout);
-      reject(new Error("Automation websocket failed to open"));
-    };
-  });
 
   const waitForTerminalEvent = async (): Promise<RpaRunEvent> => {
     await waitForCondition(
@@ -266,7 +282,7 @@ export const subscribeToRunEvents = async (
     return terminalEvent;
   };
 
-  socket.onmessage = (event) => {
+  socket.addEventListener("message", (event: MessageEvent) => {
     const raw = typeof event.data === "string" ? event.data : String(event.data);
     const payload = safeParseJson(raw);
     const parsedEvent = rpaRunEventSchema.safeParse(payload);
@@ -276,16 +292,10 @@ export const subscribeToRunEvents = async (
 
     const runEvent = parsedEvent.data;
     events.push(runEvent);
-    if (
-      runEvent.eventType === "progress" &&
-      (runEvent.status === "success" || runEvent.status === "error")
-    ) {
+    if (isTerminalRunEvent(runEvent)) {
       terminalEvent = runEvent;
     }
-    if (runEvent.eventType === "result" || runEvent.eventType === "error") {
-      terminalEvent = runEvent;
-    }
-  };
+  });
 
   return {
     events,

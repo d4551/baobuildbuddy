@@ -28,8 +28,11 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div 
-    :class="[SURFACE_GLASS_CARD_CLASS, achievement.unlocked ? 'glass-interactive ring-2 ring-primary cursor-pointer' : 'glass-disabled']"
+  <!-- SURFACE_GLASS_CARD_CLASS already carries glass-interactive; repeating it in
+       the unlocked branch emitted the class twice, and on locked tiles it paired
+       with glass-disabled, where hover-lift and pointer-events:none contradict. -->
+  <div
+    :class="[SURFACE_GLASS_CARD_CLASS, achievement.unlocked ? 'ring-2 ring-primary cursor-pointer' : 'glass-disabled']"
     :title="achievement.description"
     :aria-label="t('gamificationPage.achievementBadgeAria', { name: achievement.name, description: achievement.description })"
   >

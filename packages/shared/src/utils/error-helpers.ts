@@ -1,13 +1,18 @@
 /**
  * Shared error message extraction. Single source of truth for server and client.
  * Handles Error, Eden/API error shapes (Record with message, value.message).
+ *
+ * Every extracted message is passed through `redactSecrets`: provider SDKs quote
+ * the offending credential inside their error text, and this function is the
+ * choke point those messages travel through on their way to logs and callers.
  */
 import { API_ERROR_UNKNOWN } from "../constants/api-errors";
+import { redactSecrets } from "./secret-redaction";
 import { isRecord } from "./type-guards";
 
 function toMessage(value: string | undefined): string | null {
   if (typeof value === "string" && value.trim().length > 0) {
-    return value;
+    return redactSecrets(value);
   }
   return null;
 }

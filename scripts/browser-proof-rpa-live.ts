@@ -22,12 +22,15 @@ import {
 import { pollUntil } from "./utils/async-control";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofEnv,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
-);
-const OUT = process.env.RPA_PROOF_OUT ?? "/opt/cursor/artifacts/live-capabilities/rpa-live-ui";
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT = resolveProofOutDir("RPA_PROOF_OUT", artifactDir("live-capabilities", "rpa-live-ui"));
 
 const RE_ENABLE_WWI = /Enable Work With Indies job portal scraper/i;
 const RE_SAVE_PROVIDERS = /Save job provider configuration/i;
@@ -61,16 +64,20 @@ const enablePortalViaUi = async (page: Page): Promise<void> => {
   await shot(page, "01-providers-enabled");
 };
 
-const API_BASE = (process.env.PAGE_PROOF_API_BASE ?? "http://127.0.0.1:3000").replace(/\/$/u, "");
+const API_BASE = (resolveProofEnv("PAGE_PROOF_API_BASE") ?? "http://127.0.0.1:3000").replace(
+  /\/$/u,
+  "",
+);
 
 const countRunsViaApi = async (): Promise<number> => {
-  const response = await fetch(`${API_BASE}${API_ENDPOINTS.automationRuns}`, {
+  const runsUrl = new URL(API_ENDPOINTS.automationRuns, API_BASE).toString();
+  const response = await fetch(runsUrl, {
     signal: AbortSignal.timeout(MS_TEN_SECONDS),
   });
   if (!response.ok) {
     throw new Error(`GET ${API_ENDPOINTS.automationRuns} → ${String(response.status)}`);
   }
-  const body: unknown = await response.json();
+  const body = (await response.json()) as Array<{ id?: string }>;
   return Array.isArray(body) ? body.length : 0;
 };
 

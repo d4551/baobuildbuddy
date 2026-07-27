@@ -15,13 +15,13 @@ import { join } from "node:path";
 import { chromium, type Page } from "playwright";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { writeOutput } from "./utils/cli-output";
+import { artifactDir, resolveProofClientBase, resolveProofOutDir } from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://localhost:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://localhost:3001");
+const OUT = resolveProofOutDir(
+  "GREENHOUSE_PROOF_OUT",
+  artifactDir("baseline", "greenhouse-jobs-proof"),
 );
-const OUT =
-  process.env.GREENHOUSE_PROOF_OUT ?? join("/opt/cursor/artifacts/baseline/greenhouse-jobs-proof");
 
 const RE_SAVE_PROVIDERS = /Save Provider Config/i;
 const RE_REFRESH_JOBS = /Refresh Jobs/i;

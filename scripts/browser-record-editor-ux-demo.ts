@@ -20,12 +20,17 @@ import {
 import { writeError, writeOutput } from "./utils/cli-output";
 import { assertRealPdfFile } from "./utils/live-pdf-assert";
 import { settlePage } from "./utils/playwright-settle";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT = resolveProofOutDir(
+  "EDITOR_UX_OUT",
+  artifactDir("live-capabilities", "editor-ux"),
 );
-const OUT = process.env.EDITOR_UX_OUT ?? "/opt/cursor/artifacts/live-capabilities/editor-ux";
 
 const RE_EXPORT = /Export/i;
 const RE_EXPORT_PDF = /Export PDF/i;

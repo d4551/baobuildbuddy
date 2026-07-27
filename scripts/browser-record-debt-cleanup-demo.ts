@@ -17,12 +17,17 @@ import {
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
 import { reportFindingsAndExit } from "./utils/proof-findings";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT = resolveProofOutDir(
+  "DEBT_CLEANUP_OUT",
+  artifactDir("live-capabilities", "debt-cleanup"),
 );
-const OUT = process.env.DEBT_CLEANUP_OUT ?? "/opt/cursor/artifacts/live-capabilities/debt-cleanup";
 
 const RE_EDIT_RESUME = /Edit resume/i;
 const RE_FIX_SETUP = /Fix Setup|Fix setup/i;

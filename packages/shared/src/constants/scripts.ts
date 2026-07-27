@@ -169,3 +169,18 @@ export const PINCHTAB_READY_TIMEOUT_MS = 15_000 as const;
 
 /** Poll interval while waiting for PinchTab readiness. */
 export const PINCHTAB_POLL_INTERVAL_MS = 250 as const;
+
+/** Process exit code for a successful run. */
+export const EXIT_CODE_SUCCESS = 0 as const;
+
+/** Process exit code for a failed run. */
+export const EXIT_CODE_FAILURE = 1 as const;
+
+/** Timeout for a single dev-stack backend identity probe request. */
+export const DEV_STACK_PROBE_REQUEST_TIMEOUT_MS = 2_000 as const;
+
+/** How long the dev stack waits for its own backend to answer on the advertised API base. */
+export const DEV_STACK_PROBE_READY_TIMEOUT_MS = 30_000 as const;
+
+/** Poll interval while waiting for the dev-stack backend identity probe to succeed. */
+export const DEV_STACK_PROBE_POLL_INTERVAL_MS = 500 as const;

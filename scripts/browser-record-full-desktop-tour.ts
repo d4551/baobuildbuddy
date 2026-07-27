@@ -39,16 +39,22 @@ import { assertLiveInference } from "./utils/live-ai-probe";
 import { assertRealPdfFile } from "./utils/live-pdf-assert";
 import { settlePage } from "./utils/playwright-settle";
 import { reportFindingsAndExit } from "./utils/proof-findings";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofEnv,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
-);
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
 const OUT =
-  process.env.FULL_DESKTOP_TOUR_OUT ?? "/opt/cursor/artifacts/live-capabilities/full-desktop-tour";
-const MODEL = process.env.LOCAL_MODEL_NAME?.trim() || "llama3.2:1b";
+  resolveProofOutDir(
+  "FULL_DESKTOP_TOUR_OUT",
+  artifactDir("live-capabilities", "full-desktop-tour"),
+);
+const MODEL = resolveProofEnv("LOCAL_MODEL_NAME")?.trim() || "llama3.2:1b";
 const ENDPOINT =
-  process.env.LOCAL_MODEL_ENDPOINT?.replace(/\/$/u, "") ?? "http://127.0.0.1:11434/v1";
+  resolveProofEnv("LOCAL_MODEL_ENDPOINT")?.replace(/\/$/u, "") ?? "http://127.0.0.1:11434/v1";
 
 const ROUTES: readonly { readonly slug: string; readonly path: string }[] = [
   { slug: "dashboard", path: APP_ROUTES.dashboard },

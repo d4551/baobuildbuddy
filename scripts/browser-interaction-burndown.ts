@@ -25,13 +25,10 @@ import {
 } from "./browser-interaction-burndown-actions";
 import type { ChromeSignals } from "./browser-interaction-burndown-chrome";
 import { writeError, writeOutput } from "./utils/cli-output";
-import { resolveProofClientBase, resolveProofOutDir } from "./utils/proof-script-env";
+import { artifactDir, resolveProofClientBase, resolveProofOutDir } from "./utils/proof-script-env";
 
 const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
-const OUT_DIR = resolveProofOutDir(
-  "BROWSER_BURNOUT_OUT",
-  join("/opt/cursor/artifacts/interactive-burndown"),
-);
+const OUT_DIR = resolveProofOutDir("BROWSER_BURNOUT_OUT", artifactDir("interactive-burndown"));
 const MAX_CLICKS_PER_ROUTE = 4;
 
 const VIEWPORTS = [

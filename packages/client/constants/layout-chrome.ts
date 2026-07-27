@@ -84,6 +84,18 @@ export const SURFACE_GLASS_CLEAR_CLASS = "glass-clear";
 export const SURFACE_GLASS_SOLID_CLASS = "glass-solid";
 
 /**
+ * Accent gradient feature panel (skills readiness, and any future hero metric
+ * panel that must read as branded rather than as a neutral content card).
+ *
+ * This is deliberately not a `.glass-*` material: the gradient *is* the surface.
+ * It lives here rather than as inline utilities on the consuming component so the
+ * gradient direction and stops stay in one place, and so the card-surface gate can
+ * tell a branded panel apart from a hand-rolled copy of `UiGlassCard`.
+ */
+export const SURFACE_ACCENT_GRADIENT_PANEL_CLASS =
+  "card rounded-box border border-base-300 bg-linear-to-br from-primary to-secondary text-on-primary";
+
+/**
  * Selected state for glass cards in grids (jobs, providers, portfolio).
  */
 export const SURFACE_GLASS_CARD_SELECTED_CLASS = "glass-selected";
@@ -120,9 +132,16 @@ export const SHELL_SKIP_LINK_CLASS =
 
 /**
  * Centered auth / onboarding shell (semantic surfaces only).
+ *
+ * Block padding is not cosmetic: `items-center` on a `min-h-screen` flex column
+ * pins an over-tall card against both viewport edges once the card outgrows the
+ * viewport (measured at 1280x600: card top 0, card bottom === scrollHeight).
+ * The block padding keeps the same gutter on every edge at every height, so the
+ * onboarding card never bleeds into the viewport boundary on short/landscape
+ * viewports (WCAG 2.1 §1.4.10 reflow).
  */
 export const AUTH_SHELL_OUTER_CLASS =
-  "flex min-h-screen items-center justify-center bg-base-200 px-4";
+  "flex min-h-screen items-center justify-center bg-base-200 px-4 py-6 sm:py-10";
 
 /**
  * Auth card surface — solid content-plane (not glass). Consumed by
@@ -262,6 +281,17 @@ export const STAT_CARD_ICON_BADGE_CLASS = "rounded-box glass-subtle p-3";
 /** Stat card body spacing (comfortable responsive padding). */
 export const CARD_BODY_COMFORTABLE_CLASS = "card-body flex flex-col justify-between p-5 md:p-6";
 
+/**
+ * Card body that sits above a `UiGlassCard` link overlay.
+ *
+ * The overlay is absolutely positioned at `z-0`, so the body needs its own
+ * stacking context to stay clickable. Bound as a token rather than written as a
+ * literal so a component that renders only a card body — `JobSummaryCard`, whose
+ * card surface lives on the parent — still satisfies the daisyUI contract gate,
+ * which reads literal `card-body` usage per file.
+ */
+export const CARD_BODY_OVERLAY_CLASS = "card-body relative z-10";
+
 /** Achievement badge icon container (circular accent surface). */
 export const ACHIEVEMENT_ICON_BADGE_CLASS =
   "flex h-12 w-12 items-center justify-center rounded-full";
@@ -271,9 +301,13 @@ export const FAB_POSITION_CLASS = "left-6 bottom-24";
 
 /**
  * Floating chat stack (above mobile dock). Viewport-bounded inset-x on small screens.
+ *
+ * `inset-x-4` on a `fixed` element already determines the width (the left and
+ * right insets box the element), so no extra max-width calc is needed — a
+ * viewport-minus-gutter calc only duplicated the insets with a hardcoded unit.
  */
 export const SHELL_FLOATING_CHAT_STACK_CLASS =
-  "fixed inset-x-4 bottom-24 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end lg:inset-x-auto lg:bottom-6 lg:right-6 lg:max-w-none";
+  "fixed inset-x-4 bottom-24 z-40 flex flex-col items-end lg:inset-x-auto lg:bottom-6 lg:right-6 lg:max-w-none";
 export const FAB_ACTION_MIN_WIDTH_CLASS = "min-w-52";
 
 /** Inline CTA chevron icon size (small directional arrow). */
@@ -283,7 +317,18 @@ export const ICON_SIZE_CHEVRON_CLASS = "h-3 w-3";
 export const STAT_CARD_TITLE_BLOCK_CLASS = "mb-1 text-sm font-medium text-muted";
 export const STAT_CARD_VALUE_CLASS = "text-3xl font-bold";
 export const STAT_CARD_HEADER_ROW_CLASS = "mb-4 flex items-start justify-between";
-export const STAT_CARD_CTA_ROW_CLASS = "mt-auto flex items-center gap-1 text-xs font-semibold";
+/**
+ * Stat card CTA row (label + chevron).
+ *
+ * The semantic colour is baked in on purpose. Every stat-card CTA is the same
+ * affordance — "open this workspace" — so it must read as one control across
+ * the row. Callers previously passed each card's decorative `accentClass` here,
+ * which rendered three peer CTAs as `text-primary`, `text-secondary`, and
+ * `text-accent`: semantic roles used as decoration, so colour signalled nothing.
+ * Card-level differentiation belongs on the icon badge, not the CTA.
+ */
+export const STAT_CARD_CTA_ROW_CLASS =
+  "mt-auto flex items-center gap-1 text-xs font-semibold text-primary";
 
 /** Jobs page search input icon size. */
 export const ICON_SIZE_XS_ALT_CLASS = "h-4 w-4";

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { STACK_SPACE_Y_TOKEN_CLASS, SECONDARY_ACTION_CLASS } from "~/constants/layout";
+import { PRIMARY_ACTION_CLASS, STACK_SPACE_Y_TOKEN_CLASS } from "~/constants/layout";
 import { PERCENT_MAX } from "~/constants/numeric-ui";
 
 definePageMeta({
@@ -178,7 +178,7 @@ async function handleCompleteChallenge(challengeId: string) {
       <template #actions>
         <button
           type="button"
-          :class="[SECONDARY_ACTION_CLASS]"
+          :class="[PRIMARY_ACTION_CLASS]"
           :aria-label="t('gamificationPage.refreshAria')"
           @click="retryPageLoad"
         >

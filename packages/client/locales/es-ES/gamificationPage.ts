@@ -28,6 +28,7 @@ const gamificationPage = {
     challengeCompleteErrorFallback: "Error al completar el desafío",
     streakDaysSuffix: "días seguidos",
     longestStreakDesc: "récord personal",
+    achievementsUnlockedDesc: "desbloqueados",
     noChallengesTitle: "No hay desafíos diarios disponibles",
     noChallengesDescription:
       "Completa la configuración y acciones de carrera desde el panel para desbloquear los retos de hoy.",

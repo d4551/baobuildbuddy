@@ -8,24 +8,14 @@ definePageMeta({
 import { APP_ROUTE_BUILDERS } from "@bao/shared/constants/routes";
 import { useI18n } from "vue-i18n";
 import {
-  BADGE_OUTLINE_SM_CLASS,
-  BADGE_SM_CLASS,
-  BADGE_SUCCESS_SM_CLASS,
-  BODY_TEXT_SM_CLASS,
-  BODY_TEXT_XS_CLASS,
   CARD_TITLE_LG_CLASS,
   FLUID_WIDTH_CLASS,
-  ICON_DECORATIVE_STROKE_WIDTH,
-  ICON_SIZE_CHEVRON_CLASS,
   ICON_SIZE_XS_ALT_CLASS,
   LABEL_HIDE_BELOW_SM_CLASS,
   OUTLINE_ACTION_CLASS,
-  POINTER_EVENTS_TOKEN_CLASS,
   PRIMARY_ACTION_CLASS,
-  ROW_GAP_XS_CLASS,
   SECTION_GAP_BOTTOM_CLASS,
   SIDEBAR_WIDTH_LG_CLASS,
-  STACK_SPACING_SM_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_BLOCK_CLASS,
 } from "~/constants/layout";
@@ -87,10 +77,14 @@ const page = useJobsIndexPage();
           :link-aria-label="t('jobsPage.openRecommendationAria', { title: job.title, company: job.company })"
           :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
         >
-          <div class="card-body relative z-10">
-            <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
-            <p :class="BODY_TEXT_SM_CLASS">{{ job.company }}</p>
-          </div>
+          <JobSummaryCard
+            :job="job"
+            density="compact"
+            :experience-label="(value) => page.experienceOptionLabel(value)"
+            :format-date="(value) => page.formatDate(value)"
+            @interview="page.interviewJob"
+            @view="page.viewJob"
+          />
         </UiGlassCard>
       </SectionGrid>
     </section>
@@ -203,65 +197,13 @@ const page = useJobsIndexPage();
               :link-aria-label="t('jobsPage.openJobAria', { title: job.title, company: job.company })"
               :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
             >
-              <div class="card-body relative z-10">
-                <div :class="['flex items-start justify-between', ROW_GAP_XS_CLASS]">
-                  <h3 :class="CARD_TITLE_LG_CLASS">{{ job.title }}</h3>
-                  <JobMatchScore v-if="typeof job.matchScore === 'number'" :score="job.matchScore" compact />
-                </div>
-
-                <p class="font-medium text-secondary">{{ job.company }}</p>
-
-                <div :class="[STACK_SPACING_SM_CLASS, 'flex flex-wrap', ROW_GAP_XS_CLASS]">
-                  <span :class="BADGE_SM_CLASS">
-                    <svg :class="['me-1', ICON_SIZE_CHEVRON_CLASS]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" :stroke-width="ICON_DECORATIVE_STROKE_WIDTH" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {{ job.location }}
-                  </span>
-
-                  <span v-if="job.remote" :class="BADGE_SUCCESS_SM_CLASS">
-                    {{ t("common.workMode.remote") }}
-                  </span>
-
-                  <span v-if="job.experienceLevel" :class="BADGE_OUTLINE_SM_CLASS">
-                    {{ page.experienceOptionLabel(job.experienceLevel) }}
-                  </span>
-                </div>
-
-                <p :class="['line-clamp-2', STACK_SPACING_SM_CLASS, BODY_TEXT_SM_CLASS]">
-                  {{ job.description }}
-                </p>
-
-                <div
-                  :class="[
-                    'card-actions',
-                    STACK_SPACING_SM_CLASS,
-                    'items-center justify-between',
-                    POINTER_EVENTS_TOKEN_CLASS.auto,
-                  ]"
-                >
-                  <span :class="BODY_TEXT_XS_CLASS">
-                    {{ page.formatDate(job.postedDate) }}
-                  </span>
-                  <div :class="['flex', ROW_GAP_XS_CLASS]">
-                    <button type="button"
-                      :class="[OUTLINE_ACTION_CLASS]"
-                      :aria-label="t('jobsPage.interviewAria', { title: job.title, company: job.company })"
-                      @click.stop="page.interviewJob(job.id)"
-                    >
-                      {{ t("jobsPage.interviewButton") }}
-                    </button>
-                    <button type="button"
-                      :class="[PRIMARY_ACTION_CLASS]"
-                      :aria-label="t('jobsPage.viewAria', { title: job.title, company: job.company })"
-                      @click.stop="page.viewJob(job.id)"
-                    >
-                      {{ t("jobsPage.viewButton") }}
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <JobSummaryCard
+                :job="job"
+                :experience-label="(value) => page.experienceOptionLabel(value)"
+                :format-date="(value) => page.formatDate(value)"
+                @interview="page.interviewJob"
+                @view="page.viewJob"
+              />
             </UiGlassCard>
           </SectionGrid>
 

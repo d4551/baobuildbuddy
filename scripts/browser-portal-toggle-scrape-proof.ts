@@ -14,6 +14,7 @@ import {
   phaseVerifyJobs,
 } from "./browser-portal-toggle-phases";
 import { writeOutput } from "./utils/cli-output";
+import { artifactDir, resolveProofClientBase, resolveProofOutDir } from "./utils/proof-script-env";
 
 const WATCHED_API_PREFIXES = [
   API_ENDPOINTS.settings,
@@ -24,12 +25,8 @@ const WATCHED_API_PREFIXES = [
 
 const ORIGIN_PREFIX_PATTERN = /^https?:\/\/[^/]+/u;
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://localhost:3001").replace(
-  /\/$/u,
-  "",
-);
-const OUT =
-  process.env.PORTAL_PROOF_OUT ?? join("/opt/cursor/artifacts/baseline/portal-toggle-proof");
+const CLIENT_BASE = resolveProofClientBase("http://localhost:3001");
+const OUT = resolveProofOutDir("PORTAL_PROOF_OUT", artifactDir("baseline", "portal-toggle-proof"));
 
 const captureApiResponse = async (
   res: Response,

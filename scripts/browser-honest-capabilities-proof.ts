@@ -25,13 +25,18 @@ import { chromium, type Download, type Page } from "playwright";
 import { APP_ROUTE_BUILDERS, APP_ROUTES } from "../packages/shared/src/constants/routes";
 import { settle } from "../packages/shared/src/utils/promise";
 import { writeError, writeOutput } from "./utils/cli-output";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofEnv,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://localhost:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://localhost:3001");
+const OUT = resolveProofOutDir(
+  "HONEST_PROOF_OUT",
+  artifactDir("baseline", "honest-capabilities-proof"),
 );
-const OUT =
-  process.env.HONEST_PROOF_OUT ?? join("/opt/cursor/artifacts/baseline/honest-capabilities-proof");
 
 const RE_EXPORT = /Export/i;
 const RE_PDF = /PDF/i;
@@ -198,7 +203,7 @@ const enablePortalAndScrape = async (page: Page): Promise<boolean> => {
   return refreshJobsAndAssert(page, titlesBefore);
 };
 
-const WHISPER_BASE = (process.env.WHISPER_OPENAI_BASE ?? "http://127.0.0.1:8090").replace(
+const WHISPER_BASE = (resolveProofEnv("WHISPER_OPENAI_BASE") ?? "http://127.0.0.1:8090").replace(
   /\/$/u,
   "",
 );
@@ -207,7 +212,8 @@ const probeLocalWhisperStt = async (): Promise<{
   status: "OK" | "FAIL";
   reason: string;
 }> => {
-  const health = await settle(fetch(`${WHISPER_BASE}/health`));
+  const healthUrl = new URL("health", WHISPER_BASE).toString();
+  const health = await settle(fetch(healthUrl));
   if (health.status === "rejected" || !health.value.ok) {
     return {
       status: "FAIL",
@@ -245,15 +251,15 @@ const proveBrowserTts = async (page: Page): Promise<boolean> => {
         settled = true;
         resolve(value);
       };
-      utterance.onstart = () => {
+      utterance.addEventListener("start", () => {
         finish(true);
-      };
-      utterance.onend = () => {
+      });
+      utterance.addEventListener("end", () => {
         finish(true);
-      };
-      utterance.onerror = () => {
+      });
+      utterance.addEventListener("error", () => {
         finish(false);
-      };
+      });
       synth.cancel();
       synth.speak(utterance);
       // Fail-closed: voices.length >= 0 is a tautology — only speaking/onstart/onend count.
@@ -304,7 +310,7 @@ const main = async (): Promise<void> => {
   const pdfStat = pdfPath ? await stat(pdfPath) : null;
   const report = {
     headless: false,
-    display: process.env.DISPLAY ?? null,
+    display: resolveProofEnv("DISPLAY") ?? null,
     ai: {
       status: "FAIL",
       reason:

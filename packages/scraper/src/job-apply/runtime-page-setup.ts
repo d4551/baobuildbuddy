@@ -22,7 +22,8 @@ import {
   type JobApplyExecutionState,
   type StepRecord,
 } from "./runtime-contracts";
-import { APPLY_LINK_SELECTOR, withRetry } from "./runtime-locators";
+import { detectAndFollowHostedApplyPage } from "./runtime-follow-apply-link";
+import { withRetry } from "./runtime-locators";
 import type { JobApplyStrategy } from "./strategy-registry";
 import { JOB_APPLY_TOTAL_STEPS, resolveJobApplyStrategy } from "./strategy-registry";
 
@@ -112,56 +113,6 @@ const emitRuntimeFailure = (
     stepCount: steps.length,
   });
   return 1;
-};
-
-type FollowApplyLinkOutcome =
-  | { readonly kind: "already_hosted"; readonly url: string }
-  | { readonly kind: "followed"; readonly url: string }
-  | { readonly kind: "no_link"; readonly url: string }
-  | { readonly kind: "nav_failed"; readonly url: string; readonly href: string };
-
-/** Exported for unit tests — listing→hosted apply hop honesty. */
-export const detectAndFollowHostedApplyPage = async (
-  page: Page,
-): Promise<FollowApplyLinkOutcome> => {
-  const currentUrl = page.url();
-  if (currentUrl.includes("greenhouse.io") || currentUrl.includes("lever.co")) {
-    return { kind: "already_hosted", url: currentUrl };
-  }
-
-  const locator = page.locator(APPLY_LINK_SELECTOR).first();
-  const countResult = await settle(locator.count());
-  if (countResult.status === "rejected" || countResult.value === 0) {
-    return { kind: "no_link", url: currentUrl };
-  }
-
-  const hrefResult = await settle(locator.getAttribute("href"));
-  if (hrefResult.status === "rejected" || !hrefResult.value) {
-    return { kind: "no_link", url: currentUrl };
-  }
-
-  const href = hrefResult.value;
-  const isKnownHostedApplyPage =
-    href.includes("greenhouse") || href.includes("lever") || href.includes("apply");
-  if (!isKnownHostedApplyPage) {
-    return { kind: "no_link", url: currentUrl };
-  }
-
-  const navigateResult = await settle(
-    page.goto(href, {
-      waitUntil: "domcontentloaded",
-      timeout: automationRuntimeConfig.navigationTimeoutMs,
-    }),
-  );
-  if (navigateResult.status === "rejected") {
-    return { kind: "nav_failed", url: page.url(), href };
-  }
-  await settle(
-    page.waitForLoadState("domcontentloaded", {
-      timeout: automationRuntimeConfig.secondaryNavigationDelayMs,
-    }),
-  );
-  return { kind: "followed", url: page.url() };
 };
 
 const countFormFields = async (page: Page): Promise<number> => {
@@ -385,7 +336,9 @@ export const ensureApplicationFormVisible = async (page: Page): Promise<boolean>
   if (afterClick.status !== "fulfilled" || afterClick.value === 0) {
     // Generic boards may not use Greenhouse ids — allow continue when any text input exists.
     const anyField = await settle(
-      page.evaluate(() => document.querySelectorAll("input[type='text'], input[type='email']").length),
+      page.evaluate(
+        () => document.querySelectorAll("input[type='text'], input[type='email']").length,
+      ),
     );
     return anyField.status === "fulfilled" && anyField.value > 0;
   }

@@ -16,6 +16,7 @@ import {
   SURFACE_GLASS_CARD_CLASS,
   TOUCH_TARGET_MIN_CLASS,
 } from "~/constants/layout";
+import { UI_STAGGER_INDEX_MAX } from "~/constants/numeric-ui";
 
 interface ResumeLibraryPanelProps {
   readonly resumes: readonly ResumeData[];
@@ -103,17 +104,12 @@ function requestDelete(resumeId?: string): void {
     />
     <div v-else :class="[STACK_SPACE_Y_TOKEN_CLASS.stack4]">
       <SectionGrid grid-token="threeColumnLg">
-        <div 
-          v-for="resume in paginatedResumes"
+        <UiGlassCard
+          v-for="(resume, index) in paginatedResumes"
           :key="resume.id"
-          class="relative overflow-hidden transition-colors"
-          :class="
-            (resume.experience?.length ?? 0) > 0
-              ? 'card card-border bg-base-100 hover:bg-base-200'
-              : 'card card-dash bg-base-100 hover:bg-base-200'
-          "
+          :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
         >
-          <button 
+          <button
             type="button"
             class="absolute inset-0 z-0 rounded-box focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
             :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
@@ -133,20 +129,20 @@ function requestDelete(resumeId?: string): void {
             >
               <NuxtLink
                 :to="APP_ROUTE_BUILDERS.resumePreview(resume.id)"
-                :class="[TOUCH_TARGET_MIN_CLASS, GHOST_ACTION_DENSE_CLASS]"
+                :class="[OUTLINE_ACTION_CLASS]"
                 :aria-label="t('resumePage.previewButtonAria', { name: resume.name })"
                 @click.stop
               >
                 {{ t("resumePage.previewButton") }}
               </NuxtLink>
-              <button type="button" 
+              <button type="button"
                 :class="[OUTLINE_ACTION_CLASS]"
                 :aria-label="t('resumePage.editButtonAria', { name: resume.name })"
                 @click.stop="selectResume(resume.id)"
               >
                 {{ t("resumePage.editButton") }}
               </button>
-              <button type="button" 
+              <button type="button"
                 :class="[OUTLINE_ACTION_CLASS, BTN_VARIANT_CLASS.error]"
                 :aria-label="t('resumePage.deleteButtonAria', { name: resume.name })"
                 @click.stop="requestDelete(resume.id)"
@@ -155,7 +151,7 @@ function requestDelete(resumeId?: string): void {
               </button>
             </div>
           </div>
-        </div>
+        </UiGlassCard>
       </SectionGrid>
 
       <AppPagination

@@ -143,66 +143,68 @@ function buildFallbackInterviewContext(
   };
 }
 
+type FallbackQuestionContent = { question: string; followUps: string[]; tags: string[] };
+
+const FALLBACK_QUESTION_BUILDERS: Record<
+  InterviewQuestion["type"],
+  (
+    seed: Omit<InterviewQuestion, "id">,
+    context: FallbackInterviewContext,
+  ) => FallbackQuestionContent
+> = {
+  intro: (seed, context) => ({
+    question: `Your background highlights ${context.experienceHighlight}. How does that prepare you for the ${context.roleTarget} role at ${context.interviewEntity}?`,
+    followUps: [
+      `Which result from ${context.projectHighlight} is most relevant to ${context.interviewEntity}?`,
+      "How did you validate the outcome with teammates, stakeholders, or players?",
+      "What tradeoff from that work would you handle differently now?",
+    ],
+    tags: [...seed.tags, "candidate-context", "role-context"],
+  }),
+  behavioral: (seed, context) => ({
+    question: `Tell me about a time you aligned design, QA, or production partners to deliver ${context.focusArea} work with a clear outcome.`,
+    followUps: [
+      "What disagreement or constraint made the collaboration difficult?",
+      "How did you keep the team aligned when priorities shifted?",
+      "What evidence told you the collaboration was successful?",
+    ],
+    tags: [...seed.tags, "candidate-context", "collaboration"],
+  }),
+  "studio-specific": (seed, context) => ({
+    question: `${context.interviewEntity} is signaling ${context.hiringSignal}. How would you ramp up in your first 30 days and show that ${context.pitchAngle}?`,
+    followUps: [
+      `Which stakeholder would you meet first to support ${context.focusArea}?`,
+      "What deliverable would you aim to own by the end of your first sprint?",
+      "How would you tailor your communication to this studio context?",
+    ],
+    tags: [...seed.tags, "studio-context", "scrape-enrichment"],
+  }),
+  technical: (seed, context) => ({
+    question: `Walk me through a system from ${context.projectHighlight} where you used ${context.primaryTechnology} in a way that would transfer directly to the ${context.roleTarget} scope at ${context.interviewEntity}.`,
+    followUps: [
+      `What constraints shaped your use of ${context.primaryTechnology}?`,
+      "What telemetry, QA checks, or player signals told you the solution was healthy?",
+      "How would you scale that approach for a larger team or live-service environment?",
+    ],
+    tags: [...seed.tags, "candidate-context", "technical-context"],
+  }),
+  closing: (seed, context) => ({
+    question: `What is the strongest evidence from your resume, cover letter, or portfolio that you are ready for ${context.roleTarget} at ${context.interviewEntity} right now?`,
+    followUps: [
+      "Which accomplishment best proves that claim?",
+      "How does that evidence connect to this studio's priorities?",
+      "What would you aim to deliver in your first 30 days?",
+    ],
+    tags: [...seed.tags, "candidate-context", "closing"],
+  }),
+};
+
 function buildFallbackQuestionText(
   seed: Omit<InterviewQuestion, "id">,
   context: FallbackInterviewContext,
-): { question: string; followUps: string[]; tags: string[] } {
-  switch (seed.type) {
-    case "intro":
-      return {
-        question: `Your background highlights ${context.experienceHighlight}. How does that prepare you for the ${context.roleTarget} role at ${context.interviewEntity}?`,
-        followUps: [
-          `Which result from ${context.projectHighlight} is most relevant to ${context.interviewEntity}?`,
-          "How did you validate the outcome with teammates, stakeholders, or players?",
-          "What tradeoff from that work would you handle differently now?",
-        ],
-        tags: [...seed.tags, "candidate-context", "role-context"],
-      };
-    case "behavioral":
-      return {
-        question: `Tell me about a time you aligned design, QA, or production partners to deliver ${context.focusArea} work with a clear outcome.`,
-        followUps: [
-          "What disagreement or constraint made the collaboration difficult?",
-          "How did you keep the team aligned when priorities shifted?",
-          "What evidence told you the collaboration was successful?",
-        ],
-        tags: [...seed.tags, "candidate-context", "collaboration"],
-      };
-    case "studio-specific":
-      return {
-        question: `${context.interviewEntity} is signaling ${context.hiringSignal}. How would you ramp up in your first 30 days and show that ${context.pitchAngle}?`,
-        followUps: [
-          `Which stakeholder would you meet first to support ${context.focusArea}?`,
-          "What deliverable would you aim to own by the end of your first sprint?",
-          "How would you tailor your communication to this studio context?",
-        ],
-        tags: [...seed.tags, "studio-context", "scrape-enrichment"],
-      };
-    case "technical":
-      return {
-        question: `Walk me through a system from ${context.projectHighlight} where you used ${context.primaryTechnology} in a way that would transfer directly to the ${context.roleTarget} scope at ${context.interviewEntity}.`,
-        followUps: [
-          `What constraints shaped your use of ${context.primaryTechnology}?`,
-          "What telemetry, QA checks, or player signals told you the solution was healthy?",
-          "How would you scale that approach for a larger team or live-service environment?",
-        ],
-        tags: [...seed.tags, "candidate-context", "technical-context"],
-      };
-    case "closing":
-      return {
-        question: `What is the strongest evidence from your resume, cover letter, or portfolio that you are ready for ${context.roleTarget} at ${context.interviewEntity} right now?`,
-        followUps: [
-          "Which accomplishment best proves that claim?",
-          "How does that evidence connect to this studio's priorities?",
-          "What would you aim to deliver in your first 30 days?",
-        ],
-        tags: [...seed.tags, "candidate-context", "closing"],
-      };
-    default: {
-      const _exhaustive: never = seed.type;
-      return _exhaustive;
-    }
-  }
+): FallbackQuestionContent {
+  const builder = FALLBACK_QUESTION_BUILDERS[seed.type];
+  return builder(seed, context);
 }
 
 export function buildFallbackQuestions(

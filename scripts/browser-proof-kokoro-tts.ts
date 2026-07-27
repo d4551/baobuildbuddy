@@ -24,16 +24,22 @@ import {
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
 import { reportFindingsAndExit } from "./utils/proof-findings";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofEnv,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const SERVER_BASE = (resolveProofEnv("PAGE_PROOF_SERVER_BASE") ?? "http://127.0.0.1:3000").replace(
   /\/$/u,
   "",
 );
-const SERVER_BASE = (process.env.PAGE_PROOF_SERVER_BASE ?? "http://127.0.0.1:3000").replace(
-  /\/$/u,
-  "",
+const OUT = resolveProofOutDir(
+  "KOKORO_PROOF_OUT",
+  artifactDir("live-capabilities", "kokoro-tts"),
 );
-const OUT = process.env.KOKORO_PROOF_OUT ?? "/opt/cursor/artifacts/live-capabilities/kokoro-tts";
 const RE_SAVE_SPEECH = /Save Speech Profile|Save speech/i;
 const RE_VOICE_SETTINGS = /Speech|Voice|音声|Voix|Voz/i;
 const DESKTOP_VIEWPORT = {

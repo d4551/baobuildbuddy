@@ -26,13 +26,21 @@ import {
 } from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { reportFindingsAndExit } from "./utils/proof-findings";
+import {
+  artifactDir,
+  resolveProofEnv,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const SERVER_BASE = (process.env.PAGE_PROOF_SERVER_BASE ?? "http://127.0.0.1:3000").replace(
+const SERVER_BASE = (resolveProofEnv("PAGE_PROOF_SERVER_BASE") ?? "http://127.0.0.1:3000").replace(
   /\/$/u,
   "",
 );
-const WHISPER_BASE = (process.env.WHISPER_BASE ?? "http://127.0.0.1:8090").replace(/\/$/u, "");
-const OUT = process.env.WHISPER_PROOF_OUT ?? "/opt/cursor/artifacts/live-capabilities/whisper-stt";
+const WHISPER_BASE = (resolveProofEnv("WHISPER_BASE") ?? "http://127.0.0.1:8090").replace(/\/$/u, "");
+const OUT = resolveProofOutDir(
+  "WHISPER_PROOF_OUT",
+  artifactDir("live-capabilities", "whisper-stt"),
+);
 
 /** Minimal silent WAV — Whisper may return empty; also probe health + configured path. */
 const buildSilentWav = (): Uint8Array => {
@@ -102,7 +110,7 @@ const ensureLocalSttSettings = async (): Promise<void> => {
 };
 
 const loadWavBytes = async (): Promise<Uint8Array> => {
-  const spokenPath = "/opt/cursor/artifacts/live-capabilities/kokoro-tts/audio/kokoro-api.wav";
+  const spokenPath = artifactDir("live-capabilities", "kokoro-tts", "audio", "kokoro-api.wav");
   const spokenFile = Bun.file(spokenPath);
   if (await spokenFile.exists()) {
     return new Uint8Array(await spokenFile.arrayBuffer());

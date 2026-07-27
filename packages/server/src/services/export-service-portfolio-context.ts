@@ -7,7 +7,7 @@ import {
   PORTFOLIO_MARGIN,
   RESUME_BODY_LINE_GAP,
 } from "@bao/shared/constants/export-layout";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb as pdfRgb, StandardFonts } from "pdf-lib";
 import {
   addA4Page,
   type PortfolioRenderContext,
@@ -24,7 +24,7 @@ const fillDarkPortfolioPage = (context: PortfolioRenderContext): void => {
     y: 0,
     width: context.width,
     height: context.height,
-    color: rgb(
+    color: pdfRgb(
       EXPORT_DARK_PAGE_BACKGROUND.r,
       EXPORT_DARK_PAGE_BACKGROUND.g,
       EXPORT_DARK_PAGE_BACKGROUND.b,
@@ -41,7 +41,8 @@ export async function createPortfolioContext(
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const page = addA4Page(pdfDoc);
   const { width, height } = page.getSize();
-  const margin = layout === "compact" ? PORTFOLIO_MARGIN - PORTFOLIO_COMPACT_MARGIN_DELTA : PORTFOLIO_MARGIN;
+  const margin =
+    layout === "compact" ? PORTFOLIO_MARGIN - PORTFOLIO_COMPACT_MARGIN_DELTA : PORTFOLIO_MARGIN;
   const context: PortfolioRenderContext = {
     pdfDoc,
     page,

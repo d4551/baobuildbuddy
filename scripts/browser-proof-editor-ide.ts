@@ -20,12 +20,17 @@ import {
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
 import { reportFindingsAndExit } from "./utils/proof-findings";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT = resolveProofOutDir(
+  "EDITOR_IDE_OUT",
+  artifactDir("live-capabilities", "editor-ide"),
 );
-const OUT = process.env.EDITOR_IDE_OUT ?? "/opt/cursor/artifacts/live-capabilities/editor-ide";
 const RE_SEARCH = /Search/i;
 const DESKTOP_VIEWPORT = {
   width: VIEWPORT_WIDTH_DESKTOP,

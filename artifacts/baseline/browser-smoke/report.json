@@ -1,5 +1,5 @@
 {
-  "CLIENT_BASE": "http://127.0.0.1:3001",
+  "CLIENT_BASE": "http://127.0.0.1:3101",
   "report": [
     {
       "slug": "dashboard",

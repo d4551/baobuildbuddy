@@ -24,6 +24,35 @@ import { collectDefinedStringValues } from "@bao/shared/utils/export-contract";
 import { type PortfolioRenderContext, toPdfColor } from "./export-service-contracts";
 import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 
+function drawFeaturedBadge(context: PortfolioRenderContext): void {
+  context.page.drawRectangle({
+    x: context.margin,
+    y: context.yPosition - PORTFOLIO_FEATURED_BADGE_BASELINE_OFFSET_Y,
+    width: PORTFOLIO_FEATURED_BADGE_WIDTH,
+    height: PORTFOLIO_FEATURED_BADGE_HEIGHT,
+    color: context.colors.featured,
+  });
+  context.page.drawText("FEATURED", {
+    x: context.margin + PORTFOLIO_FEATURED_BADGE_INSET_X,
+    y: context.yPosition,
+    size: PORTFOLIO_PROJECT_LABEL_SIZE,
+    font: context.boldFont,
+    color: toPdfColor(PORTFOLIO_BANNER_TITLE_COLOR),
+  });
+  context.yPosition -= COUNT_FIFTEEN;
+}
+
+function drawFeaturedInline(context: PortfolioRenderContext): void {
+  context.page.drawText("* FEATURED", {
+    x: context.margin,
+    y: context.yPosition,
+    size: 9,
+    font: context.boldFont,
+    color: context.colors.featured,
+  });
+  context.yPosition -= COUNT_FIFTEEN;
+}
+
 function renderPortfolioProjectHeading(
   context: PortfolioRenderContext,
   project: PortfolioProject,
@@ -61,32 +90,11 @@ function renderPortfolioProjectHeading(
   }
 
   if (context.layout === "showcase") {
-    context.page.drawRectangle({
-      x: context.margin,
-      y: context.yPosition - PORTFOLIO_FEATURED_BADGE_BASELINE_OFFSET_Y,
-      width: PORTFOLIO_FEATURED_BADGE_WIDTH,
-      height: PORTFOLIO_FEATURED_BADGE_HEIGHT,
-      color: context.colors.featured,
-    });
-    context.page.drawText("FEATURED", {
-      x: context.margin + PORTFOLIO_FEATURED_BADGE_INSET_X,
-      y: context.yPosition,
-      size: PORTFOLIO_PROJECT_LABEL_SIZE,
-      font: context.boldFont,
-      color: toPdfColor(PORTFOLIO_BANNER_TITLE_COLOR),
-    });
-    context.yPosition -= COUNT_FIFTEEN;
+    drawFeaturedBadge(context);
     return;
   }
 
-  context.page.drawText("* FEATURED", {
-    x: context.margin,
-    y: context.yPosition,
-    size: 9,
-    font: context.boldFont,
-    color: context.colors.featured,
-  });
-  context.yPosition -= COUNT_FIFTEEN;
+  drawFeaturedInline(context);
 }
 
 function renderPortfolioProjectRole(context: PortfolioRenderContext, role?: string): void {

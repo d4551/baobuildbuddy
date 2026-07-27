@@ -49,10 +49,16 @@ export interface ResumeSkillGroupOptions {
     labelColor: Color;
     trailingGap: number;
 }
+export interface CoverLetterContentSections {
+    introduction?: string;
+    body?: string;
+    conclusion?: string;
+}
+export type CoverLetterContent = string | CoverLetterContentSections;
 export interface CoverLetterPayload {
     company: string;
     position: string;
-    content: unknown;
+    content: CoverLetterContent;
     template?: string;
 }
 export interface CoverLetterUserProfile {

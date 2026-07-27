@@ -20,13 +20,18 @@ import {
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
 import { reportFindingsAndExit } from "./utils/proof-findings";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
-);
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
 const OUT =
-  process.env.ON_DEVICE_SPEECH_OUT ?? "/opt/cursor/artifacts/live-capabilities/on-device-speech";
+  resolveProofOutDir(
+  "ON_DEVICE_SPEECH_OUT",
+  artifactDir("live-capabilities", "on-device-speech"),
+);
 
 const RE_SAVE_SPEECH = /Save Speech Profile|Save speech/i;
 const RE_VOICE_SETTINGS = /Speech|Voice|音声|Voix|Voz/i;

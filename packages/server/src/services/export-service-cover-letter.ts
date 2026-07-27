@@ -34,10 +34,11 @@ import {
   formatExportDate,
   toCoverLetterParagraphs,
 } from "@bao/shared/utils/export-contract";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb as pdfRgb, StandardFonts } from "pdf-lib";
 
 import {
   addA4Page,
+  type CoverLetterContent,
   type CoverLetterPayload,
   type CoverLetterRenderContext,
   type CoverLetterUserProfile,
@@ -53,7 +54,7 @@ const fillDarkPage = (context: CoverLetterRenderContext): void => {
     y: 0,
     width: context.width,
     height: context.height,
-    color: rgb(
+    color: pdfRgb(
       EXPORT_DARK_PAGE_BACKGROUND.r,
       EXPORT_DARK_PAGE_BACKGROUND.g,
       EXPORT_DARK_PAGE_BACKGROUND.b,
@@ -127,7 +128,8 @@ async function createCoverLetterContext(
 }
 
 function drawCoverLetterDivider(context: CoverLetterRenderContext): void {
-  const thickness = context.layout === "centered-formal" ? COVER_LETTER_FORMAL_DIVIDER_THICKNESS : 1;
+  const thickness =
+    context.layout === "centered-formal" ? COVER_LETTER_FORMAL_DIVIDER_THICKNESS : 1;
   context.page.drawLine({
     start: { x: context.margin, y: context.yPosition },
     end: { x: context.width - context.margin, y: context.yPosition },
@@ -148,7 +150,12 @@ function ensureCoverLetterSpace(context: CoverLetterRenderContext, requiredSpace
   drawAccentRail(context);
 }
 
-function textX(context: CoverLetterRenderContext, text: string, size: number, bold = false): number {
+function textX(
+  context: CoverLetterRenderContext,
+  text: string,
+  size: number,
+  bold = false,
+): number {
   if (context.layout !== "centered-formal") {
     return context.margin;
   }
@@ -162,10 +169,12 @@ function renderCoverLetterSender(
   userProfile: CoverLetterUserProfile,
 ): void {
   const nameSize =
-    context.layout === "banner-dark" ? COVER_LETTER_NAME_SIZE_BANNER : COVER_LETTER_NAME_SIZE_DEFAULT;
+    context.layout === "banner-dark"
+      ? COVER_LETTER_NAME_SIZE_BANNER
+      : COVER_LETTER_NAME_SIZE_DEFAULT;
   const nameColor =
     context.layout === "banner-dark"
-      ? rgb(
+      ? pdfRgb(
           COVER_LETTER_BANNER_NAME_COLOR.r,
           COVER_LETTER_BANNER_NAME_COLOR.g,
           COVER_LETTER_BANNER_NAME_COLOR.b,
@@ -196,7 +205,7 @@ function renderCoverLetterSender(
     font: context.font,
     color:
       context.layout === "banner-dark"
-        ? rgb(
+        ? pdfRgb(
             COVER_LETTER_BANNER_MUTED_COLOR.r,
             COVER_LETTER_BANNER_MUTED_COLOR.g,
             COVER_LETTER_BANNER_MUTED_COLOR.b,
@@ -224,8 +233,7 @@ function renderCoverLetterRecipient(
 ): void {
   if (context.layout === "technical-badge") {
     const badge = `ROLE // ${coverLetter.position.toUpperCase()}`;
-    const badgeWidth =
-      context.boldFont.widthOfTextAtSize(badge, 10) + COVER_LETTER_BADGE_PADDING_X;
+    const badgeWidth = context.boldFont.widthOfTextAtSize(badge, 10) + COVER_LETTER_BADGE_PADDING_X;
     context.page.drawRectangle({
       x: context.margin,
       y: context.yPosition - COVER_LETTER_BADGE_OFFSET_Y,
@@ -238,7 +246,7 @@ function renderCoverLetterRecipient(
       y: context.yPosition,
       size: 10,
       font: context.boldFont,
-      color: rgb(
+      color: pdfRgb(
         COVER_LETTER_BADGE_TEXT_COLOR.r,
         COVER_LETTER_BADGE_TEXT_COLOR.g,
         COVER_LETTER_BADGE_TEXT_COLOR.b,
@@ -311,7 +319,10 @@ function drawCoverLetterParagraph(context: CoverLetterRenderContext, paragraph: 
   context.yPosition -= COVER_LETTER_PARAGRAPH_GAP;
 }
 
-function renderCoverLetterBody(context: CoverLetterRenderContext, content: unknown): void {
+function renderCoverLetterBody(
+  context: CoverLetterRenderContext,
+  content: CoverLetterContent,
+): void {
   for (const paragraph of toCoverLetterParagraphs(content)) {
     drawCoverLetterParagraph(context, paragraph);
   }

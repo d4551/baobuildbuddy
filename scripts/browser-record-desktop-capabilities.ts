@@ -19,14 +19,18 @@ import {
 } from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofEnv,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT = resolveProofOutDir(
+  "CAPABILITY_PROOF_OUT",
+  artifactDir("visual-mission", "desktop-capabilities"),
 );
-const OUT =
-  process.env.CAPABILITY_PROOF_OUT ??
-  join("/opt/cursor/artifacts/visual-mission/desktop-capabilities");
 
 const ROUTES: readonly { readonly name: string; readonly path: string }[] = [
   { name: "05-jobs", path: APP_ROUTES.jobs },
@@ -230,7 +234,7 @@ const main = async (): Promise<void> => {
   const videoPath = await captureCapabilityVideo(page, context, browser, rawDir);
   const report = {
     CLIENT_BASE,
-    display: process.env.DISPLAY ?? null,
+    display: resolveProofEnv("DISPLAY") ?? null,
     omniOpen,
     omniFocus,
     theme,

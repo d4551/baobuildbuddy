@@ -16,6 +16,7 @@ import {
   SECTION_RAIL_LABEL_CLASS,
   SHADOW_TOKEN_CLASS,
   STACK_SPACE_Y_TOKEN_CLASS,
+  SURFACE_GLASS_CARD_CLASS,
   SURFACE_GLASS_SUBTLE_CLASS,
   TOUCH_TARGET_MIN_CLASS,
   TRUNCATE_FLEX_CHILD_CLASS,
@@ -96,7 +97,7 @@ const activeDescription = computed<string>(() => {
 <template>
   <div :class="[STACK_SPACE_Y_TOKEN_CLASS.stack6]">
     <!-- No overflow-x-clip here: section rail must scroll horizontally @320. -->
-    <section class="card card-border card-glass" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]" :aria-label="t(ariaLabelKey)">
+    <section :class="[SURFACE_GLASS_CARD_CLASS, FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS]" :aria-label="t(ariaLabelKey)">
       <div class="card-body lg:p-5" :class="[FLUID_WIDTH_CLASS, TRUNCATE_FLEX_CHILD_CLASS, FLEX_GAP_TOKEN_CLASS.gap4, PADDING_TOKEN_CLASS.p4]">
         <div
           v-if="activeSectionEntry"

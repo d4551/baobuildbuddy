@@ -18,12 +18,17 @@ import {
 } from "./constants/numeric-literals";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { settlePage } from "./utils/playwright-settle";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT_DIR = resolveProofOutDir(
+  "NAV_IA_PROOF_OUT",
+  artifactDir("debug-ia", "proof-nav-ia"),
 );
-const OUT_DIR = process.env.NAV_IA_PROOF_OUT ?? "/opt/cursor/artifacts/debug-ia/proof-nav-ia";
 const SETTINGS_CRUMB_PATTERN = /^Settings$/iu;
 
 type Finding = { readonly check: string; readonly ok: boolean; readonly detail: string };

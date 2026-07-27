@@ -20,7 +20,7 @@ import {
   HTTP_STATUS_OK,
 } from "@bao/shared/constants/http";
 import { SCHEMA_MAX_LENGTH_LONG } from "@bao/shared/constants/schema-limits";
-import type { AIChatContextDomain, AIResponse } from "@bao/shared/types/ai";
+import type { AIChatContextDomain, AIResponse, ChatMessage } from "@bao/shared/types/ai";
 import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
@@ -104,6 +104,69 @@ const loadChatEntityEnrichment = async (
   return serializeEntityPromptContext(entityContext);
 };
 
+/**
+ * Everything one chat turn needs to generate, persist, and shape a reply.
+ *
+ * `preferredDomain` is typed as the domain union rather than a bare string: the
+ * previous `string | undefined` admitted values `contextManager.generateFollowUps`
+ * cannot dispatch on, and pushed the mismatch out to the call site as a type
+ * error instead of rejecting it at the boundary. `messages` is likewise the real
+ * `ChatMessage[]` the AI service expects, not a widened role/content shape.
+ */
+type ChatTurnRequest = {
+  aiService: Awaited<ReturnType<typeof getAIService>>;
+  message: string;
+  sessionId: string;
+  systemPrompt: string;
+  messages: ChatMessage[];
+  preferredDomain: AIChatContextDomain;
+};
+
+/**
+ * Generates the assistant reply, persists it, and builds the chat response.
+ */
+const generateAndPersistAssistantMessage = async ({
+  aiService,
+  message,
+  sessionId,
+  systemPrompt,
+  messages,
+  preferredDomain,
+}: ChatTurnRequest) => {
+  const generationResult = await settle(
+    aiService.generate(message, {
+      purpose: "chat",
+      systemPrompt,
+      messages,
+      temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
+      maxTokens: SCHEMA_MAX_LENGTH_LONG,
+    }),
+  );
+  if (generationResult.status === "rejected") {
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+      error: toErrorMessage(generationResult.reason, API_ERROR_GENERATE_AI_RESPONSE),
+    });
+  }
+
+  const response = generationResult.value;
+  if (response.error) {
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, { error: response.error });
+  }
+
+  const assistantMessage = createChatMessage("assistant", response.content, sessionId);
+  const persistAssistantMessageResult = await persistChatMessage(assistantMessage);
+  if (persistAssistantMessageResult.status === "rejected") {
+    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
+      error: toErrorMessage(persistAssistantMessageResult.reason, API_ERROR_GENERATE_AI_RESPONSE),
+    });
+  }
+
+  return routeResult(
+    HTTP_STATUS_OK,
+    buildChatRouteResponse(assistantMessage, response, preferredDomain, sessionId),
+  );
+};
+
 export const handleChatRoute = async (body: {
   message: string;
   sessionId?: string;
@@ -137,38 +200,15 @@ export const handleChatRoute = async (body: {
     clientContext,
     entityEnrichment,
   );
-  const generationResult = await settle(
-    aiService.generate(body.message, {
-      purpose: "chat",
-      systemPrompt,
-      messages: contextualConversation.messages,
-      temperature: AI_DEFAULT_TEMPERATURE_CREATIVE,
-      maxTokens: SCHEMA_MAX_LENGTH_LONG,
-    }),
-  );
-  if (generationResult.status === "rejected") {
-    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
-      error: toErrorMessage(generationResult.reason, API_ERROR_GENERATE_AI_RESPONSE),
-    });
-  }
 
-  const response = generationResult.value;
-  if (response.error) {
-    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, { error: response.error });
-  }
-
-  const assistantMessage = createChatMessage("assistant", response.content, sessionId);
-  const persistAssistantMessageResult = await persistChatMessage(assistantMessage);
-  if (persistAssistantMessageResult.status === "rejected") {
-    return routeResult(HTTP_STATUS_INTERNAL_SERVER_ERROR, {
-      error: toErrorMessage(persistAssistantMessageResult.reason, API_ERROR_GENERATE_AI_RESPONSE),
-    });
-  }
-
-  return routeResult(
-    HTTP_STATUS_OK,
-    buildChatRouteResponse(assistantMessage, response, preferredDomain, sessionId),
-  );
+  return generateAndPersistAssistantMessage({
+    aiService,
+    message: body.message,
+    sessionId,
+    systemPrompt,
+    messages: contextualConversation.messages,
+    preferredDomain,
+  });
 };
 
 export const handleAnalyzeResumeRoute = async (body: AnalyzeResumeBody) => {

@@ -21,6 +21,11 @@ export declare const AUTH_QUERY_TOKEN_PARAM = "token";
  * compares it against the stored hash using `timingSafeEqual`.
  *
  * Keys are checked for revocation and expiry before hash comparison.
+ *
+ * One exception exists: while the instance holds no API key hash, the endpoints
+ * in `SETUP_PREBOOTSTRAP_ENDPOINTS` answer without a credential so the first-run
+ * setup wizard can test provider connectivity. Bootstrapped state is read from
+ * the database, so the grace closes as soon as a key is provisioned.
  */
 export declare function authenticateApiKey(request: Request): Promise<AuthFailure | null>;
 export declare const authGuard: Elysia<"", "local", {

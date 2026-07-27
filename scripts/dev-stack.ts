@@ -10,12 +10,25 @@ import {
   DEFAULT_HOST,
   LOOPBACK_HOST,
   LOOPBACK_HOST_IPV4,
+  TRACE_ID_HEADER,
 } from "../packages/shared/src/constants/runtime";
 import {
+  DEV_STACK_PROBE_POLL_INTERVAL_MS,
+  DEV_STACK_PROBE_READY_TIMEOUT_MS,
+  DEV_STACK_PROBE_REQUEST_TIMEOUT_MS,
+  EXIT_CODE_FAILURE,
+  EXIT_CODE_SUCCESS,
   PINCHTAB_POLL_INTERVAL_MS,
   PINCHTAB_READY_TIMEOUT_MS,
   PINCHTAB_REQUEST_TIMEOUT_MS,
 } from "../packages/shared/src/constants/scripts";
+import {
+  BACKEND_PROBE_NO_RESPONSE_STATUS,
+  type BackendProbeVerdict,
+  classifyBackendProbe,
+  describeForeignBackend,
+  toBackendProbeUrl,
+} from "../packages/shared/src/utils/backend-identity-probe";
 
 type ProcessName = "server" | "client";
 type ManagedProcess = ReturnType<typeof Bun.spawn>;
@@ -121,14 +134,23 @@ let shuttingDown = false;
 
 const waitForExit = async (childProcess: ManagedProcess): Promise<number> => childProcess.exited;
 
+/**
+ * Spawns a managed child and registers it for shutdown immediately.
+ *
+ * Registration happens at spawn time, not when `trackProcess` is awaited, so a
+ * failure between the two — the backend identity probe, for instance — still
+ * tears the child down instead of orphaning it.
+ */
 const spawnProcess = (args: string[], env: Record<string, string>): ManagedProcess => {
-  return Bun.spawn(["bun", ...args], {
+  const child = Bun.spawn(["bun", ...args], {
     cwd: process.cwd(),
     env,
     stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
   });
+  trackedProcesses.push(child);
+  return child;
 };
 
 const spawnServer = (): ManagedProcess => {
@@ -156,7 +178,14 @@ const spawnClient = (): ManagedProcess => {
   );
 };
 
-const shutdown = async (reason: string): Promise<void> => {
+/**
+ * Stops every tracked child and exits.
+ *
+ * `exitCode` exists so a startup failure (for example another process holding
+ * the API port) exits non-zero instead of masquerading as a clean shutdown —
+ * a dev stack that dies with status 0 reads as success to `bun run` and CI.
+ */
+const shutdown = async (reason: string, exitCode = EXIT_CODE_SUCCESS): Promise<void> => {
   if (shuttingDown) {
     return;
   }
@@ -169,12 +198,20 @@ const shutdown = async (reason: string): Promise<void> => {
 
   await Promise.allSettled(trackedProcesses.map(waitForExit));
 
-  write("[bao/dev-stack] exited cleanly\n");
-  process.exit(0);
+  write(
+    exitCode === EXIT_CODE_SUCCESS
+      ? "[bao/dev-stack] exited cleanly\n"
+      : `[bao/dev-stack] exited with code ${String(exitCode)}\n`,
+  );
+  process.exit(exitCode);
 };
 
+/**
+ * Awaits a managed child and shuts the stack down when it dies unexpectedly.
+ *
+ * Registration is owned by `spawnProcess`, so this only observes the exit.
+ */
 const trackProcess = async (name: ProcessName, proc: ManagedProcess): Promise<void> => {
-  trackedProcesses.push(proc);
   const exitCode = await waitForExit(proc);
   write(`[bao/dev-stack] ${name} exited with code ${exitCode}\n`);
   if (!shuttingDown) {
@@ -255,6 +292,67 @@ const ensurePinchTabRunning = async (): Promise<string> => {
   return pollUntilReady();
 };
 
+/**
+ * Performs one identity probe against the advertised API base.
+ */
+const probeBackendOnce = async (probeUrl: string): Promise<BackendProbeVerdict> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), DEV_STACK_PROBE_REQUEST_TIMEOUT_MS);
+  const result = await settlePromise(fetch(probeUrl, { signal: controller.signal }));
+  clearTimeout(timeout);
+
+  if (result.status === "rejected") {
+    return classifyBackendProbe({
+      status: BACKEND_PROBE_NO_RESPONSE_STATUS,
+      traceIdHeader: null,
+      bodyText: "",
+    });
+  }
+
+  const bodyResult = await settlePromise(result.value.text());
+  return classifyBackendProbe({
+    status: result.value.status,
+    traceIdHeader: result.value.headers.get(TRACE_ID_HEADER),
+    bodyText: bodyResult.status === "fulfilled" ? bodyResult.value : "",
+  });
+};
+
+/**
+ * Waits until the advertised API base is proven to be this stack's own backend.
+ *
+ * A foreign responder fails immediately: retrying cannot turn somebody else's
+ * server into ours, and continuing would hand the client the wrong backend.
+ * Only "unreachable" is retried, because our own server needs time to boot.
+ */
+const ensureOwnBackendReachable = async (apiBase: string): Promise<void> => {
+  const probeUrl = toBackendProbeUrl(apiBase);
+  const deadline = Date.now() + DEV_STACK_PROBE_READY_TIMEOUT_MS;
+
+  const poll = async (): Promise<void> => {
+    const verdict = await probeBackendOnce(probeUrl);
+    if (verdict.kind === "ours") {
+      write(`[bao/dev-stack] backend identity confirmed at ${apiBase}\n`);
+      return;
+    }
+    if (verdict.kind === "foreign") {
+      write(`[bao/dev-stack] ${describeForeignBackend(apiBase, verdict.reason)}\n`);
+      await shutdown(`port conflict on ${apiBase}`, EXIT_CODE_FAILURE);
+      return;
+    }
+    if (Date.now() >= deadline) {
+      write(
+        `[bao/dev-stack] backend did not answer on ${apiBase} within ${String(DEV_STACK_PROBE_READY_TIMEOUT_MS)}ms (${verdict.reason})\n`,
+      );
+      await shutdown(`backend unreachable on ${apiBase}`, EXIT_CODE_FAILURE);
+      return;
+    }
+    await new Promise<void>((resolve) => setTimeout(resolve, DEV_STACK_PROBE_POLL_INTERVAL_MS));
+    return poll();
+  };
+
+  return poll();
+};
+
 const main = async (): Promise<void> => {
   const pinchtabUrl = await ensurePinchTabRunning();
   runtime.serverEnv.PINCHTAB_URL = pinchtabUrl;
@@ -262,6 +360,13 @@ const main = async (): Promise<void> => {
 
   write(`[bao/dev-stack] launching server on port ${toStringPort(runtime.serverPort)}\n`);
   const server = spawnServer();
+
+  // Prove the address the client will be told to call is served by the server we
+  // just spawned. Our server binds the IPv6 wildcard, so a foreign process on
+  // the IPv4 loopback wins that address without ever raising EADDRINUSE — and
+  // the client would silently talk to it instead of us.
+  await ensureOwnBackendReachable(runtime.clientEnv.NUXT_PUBLIC_API_BASE);
+
   write(`[bao/dev-stack] launching client on port ${toStringPort(runtime.clientPort)}\n`);
   const client = spawnClient();
 

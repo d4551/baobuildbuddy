@@ -2,6 +2,8 @@
  * Module-level env reader for browser proof scripts.
  * Sole allowed env surface for PAGE_PROOF_* / browser artifact paths.
  */
+import { join } from "node:path";
+
 type EnvMap = Readonly<Record<string, string | undefined>>;
 
 const TRAILING_SLASH_RE = /\/$/u;
@@ -12,6 +14,14 @@ const readRuntimeEnv = (): EnvMap => {
   };
   return runtime.process?.env ?? {};
 };
+
+/**
+ * Project-relative artifact directory SSOT.
+ * All proof scripts MUST resolve output dirs through this helper — never
+ * hardcode absolute machine-specific paths.
+ */
+export const artifactDir = (...segments: string[]): string =>
+  join(process.cwd(), "artifacts", ...segments);
 
 export const resolveProofClientBase = (defaultBase: string): string => {
   const raw = readRuntimeEnv().PAGE_PROOF_CLIENT_BASE ?? defaultBase;

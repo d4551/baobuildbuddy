@@ -66,7 +66,7 @@ const { t } = useI18n();
       :stats="[
         { titleKey: 'gamificationPage.currentStreakTitle', value: progress.currentStreak || 0, valueClass: 'text-primary', descKey: 'gamificationPage.streakDaysSuffix', figure: GAMIFICATION_CURRENT_STREAK_ICON },
         { titleKey: 'gamificationPage.longestStreakTitle', value: progress.longestStreak || 0, valueClass: 'text-secondary', descKey: 'gamificationPage.longestStreakDesc', figure: GAMIFICATION_LONGEST_STREAK_ICON },
-        { titleKey: 'gamificationPage.achievementsTitle', value: unlockedAchievementsCount, valueClass: 'text-accent', descKey: 'gamificationPage.longestStreakDesc', figure: GAMIFICATION_ACHIEVEMENTS_ICON },
+        { titleKey: 'gamificationPage.achievementsTitle', value: unlockedAchievementsCount, valueClass: 'text-accent', descKey: 'gamificationPage.achievementsUnlockedDesc', figure: GAMIFICATION_ACHIEVEMENTS_ICON },
       ]"
     />
   </div>

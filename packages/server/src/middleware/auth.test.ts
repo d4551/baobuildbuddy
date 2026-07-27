@@ -4,6 +4,10 @@ import {
   API_ERROR_INVALID_API_KEY,
   API_ERROR_MISSING_AUTH_HEADER,
 } from "@bao/shared/constants/api-errors";
+import {
+  isSetupPreBootstrapEndpoint,
+  SETUP_PREBOOTSTRAP_ENDPOINTS,
+} from "@bao/shared/constants/endpoints";
 import { HTTP_STATUS_OK, HTTP_STATUS_UNAUTHORIZED } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID } from "@bao/shared/types/settings-defaults";
 import { eq } from "drizzle-orm";
@@ -153,14 +157,100 @@ describe("authenticateApiKey acceptance cases", () => {
         headers: { authorization: "Bearer bao_valid_token" },
       }),
     );
-    expect(failure).toBeNull();
+    expect(failure).toEqual(null);
   });
 
   test("skips validation when disableAuth is set", async () => {
     Bun.env.BAO_DISABLE_AUTH = "true";
     await db.delete(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
     const failure = await authenticateApiKey(new Request("http://localhost/api/ws/chat"));
-    expect(failure).toBeNull();
+    expect(failure).toEqual(null);
+  });
+});
+
+describe("authenticateApiKey first-run setup grace", () => {
+  const setupEndpoint = SETUP_PREBOOTSTRAP_ENDPOINTS[0];
+  const setupUrl = `http://localhost${setupEndpoint.path}`;
+
+  test("allows the allowlisted setup endpoint while no API key hash exists", async () => {
+    await db.delete(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+    const failure = await authenticateApiKey(
+      new Request(setupUrl, { method: setupEndpoint.method }),
+    );
+    expect(failure).toEqual(null);
+  });
+
+  test("closes the grace once the instance is bootstrapped", async () => {
+    await seedAuthKey("bao_bootstrapped_key");
+    const failure = await authenticateApiKey(
+      new Request(setupUrl, { method: setupEndpoint.method }),
+    );
+    expect(failure).toEqual({
+      error: API_ERROR_MISSING_AUTH_HEADER,
+      status: HTTP_STATUS_UNAUTHORIZED,
+    });
+  });
+
+  test("does not extend the grace to a non-allowlisted route pre-bootstrap", async () => {
+    await db.delete(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+    const failure = await authenticateApiKey(
+      new Request("http://localhost/api/settings", { method: "GET" }),
+    );
+    expect(failure).toEqual({
+      error: API_ERROR_MISSING_AUTH_HEADER,
+      status: HTTP_STATUS_UNAUTHORIZED,
+    });
+  });
+
+  test("does not extend the grace to another method on the allowlisted path", async () => {
+    await db.delete(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+    const failure = await authenticateApiKey(new Request(setupUrl, { method: "GET" }));
+    expect(failure).toEqual({
+      error: API_ERROR_MISSING_AUTH_HEADER,
+      status: HTTP_STATUS_UNAUTHORIZED,
+    });
+  });
+
+  test("does not let a query string smuggle a non-allowlisted path past the grace", async () => {
+    await db.delete(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+    const failure = await authenticateApiKey(
+      new Request(`http://localhost/api/settings?next=${encodeURIComponent(setupEndpoint.path)}`, {
+        method: setupEndpoint.method,
+      }),
+    );
+    expect(failure).toEqual({
+      error: API_ERROR_MISSING_AUTH_HEADER,
+      status: HTTP_STATUS_UNAUTHORIZED,
+    });
+  });
+
+  test("guarded app serves the setup endpoint pre-bootstrap and blocks it after", async () => {
+    const app = new Elysia().use(authGuard).post(setupEndpoint.path, () => ({ reachable: true }));
+
+    await db.delete(auth).where(eq(auth.id, DEFAULT_PROFILE_ID));
+    const openResponse = await app.handle(new Request(setupUrl, { method: setupEndpoint.method }));
+    expect(openResponse.status).toBe(HTTP_STATUS_OK);
+    expect(await openResponse.json()).toEqual({ reachable: true });
+
+    await seedAuthKey("bao_guard_setup_key");
+    const closedResponse = await app.handle(
+      new Request(setupUrl, { method: setupEndpoint.method }),
+    );
+    expect(closedResponse.status).toBe(HTTP_STATUS_UNAUTHORIZED);
+    expect(await closedResponse.json()).toEqual({ error: API_ERROR_MISSING_AUTH_HEADER });
+  });
+});
+
+describe("isSetupPreBootstrapEndpoint", () => {
+  test("matches the allowlisted pair with either method casing", () => {
+    expect(isSetupPreBootstrapEndpoint("post", "/api/settings/test-api-key")).toBe(true);
+    expect(isSetupPreBootstrapEndpoint("POST", "/api/settings/test-api-key")).toBe(true);
+  });
+
+  test("rejects unlisted methods, parents, and child paths", () => {
+    expect(isSetupPreBootstrapEndpoint("GET", "/api/settings/test-api-key")).toBe(false);
+    expect(isSetupPreBootstrapEndpoint("POST", "/api/settings")).toBe(false);
+    expect(isSetupPreBootstrapEndpoint("POST", "/api/settings/test-api-key/extra")).toBe(false);
   });
 });
 

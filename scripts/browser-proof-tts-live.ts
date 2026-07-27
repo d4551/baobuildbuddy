@@ -10,7 +10,6 @@ await writeOutput(
 const proc = Bun.spawn(["bun", "run", "scripts/browser-proof-kokoro-tts.ts"], {
   stdout: "inherit",
   stderr: "inherit",
-  env: process.env,
 });
 const code = await proc.exited;
 if (code !== 0) {

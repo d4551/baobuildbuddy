@@ -76,7 +76,8 @@ const { t } = useI18n();
 const runtimeConfig = useRuntimeConfig();
 
 const openaiV1BaseUrl = computed(() => {
-  const rawBase = String(runtimeConfig.public.apiBase ?? "http://localhost:3000");
+  const fallbackBase = `http://localhost:${DEFAULT_SERVER_PORT}`;
+  const rawBase = String(runtimeConfig.public.apiBase ?? fallbackBase);
   const apiBase = rawBase.endsWith("/") ? rawBase.slice(0, -1) : rawBase;
   return `${apiBase}${OPENAI_V1_ENDPOINT_PREFIX}`;
 });

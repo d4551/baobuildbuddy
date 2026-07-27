@@ -15,5 +15,6 @@ onMounted(() => {
         <slot />
       </div>
     </div>
+    <ToastContainer />
   </main>
 </template>

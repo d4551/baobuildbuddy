@@ -17,13 +17,15 @@ import {
   scoreSmokeRoute,
 } from "./browser-visual-smoke-signals";
 import { writeError, writeOutput } from "./utils/cli-output";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofEnv,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
-);
-const OUT_DIR =
-  process.env.BROWSER_SMOKE_OUT ?? join(process.cwd(), "artifacts", "baseline", "browser-smoke");
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT_DIR = resolveProofOutDir("BROWSER_SMOKE_OUT", artifactDir("baseline", "browser-smoke"));
 const VIEWPORTS = [
   { name: "mobile", width: 320, height: 720 },
   { name: "tablet", width: 768, height: 1024 },
@@ -203,8 +205,9 @@ const resolveSmokeLaunchOptions = (): {
 } => {
   // Visual proof defaults to headed Chromium when a display is available.
   // Set PAGE_PROOF_HEADLESS=true only for CI environments without a display.
-  const forceHeadless = process.env.PAGE_PROOF_HEADLESS === "true";
-  const hasDisplay = Boolean(process.env.DISPLAY && process.env.DISPLAY.length > 0);
+  const forceHeadless = resolveProofEnv("PAGE_PROOF_HEADLESS") === "true";
+  const display = resolveProofEnv("DISPLAY");
+  const hasDisplay = Boolean(display && display.length > 0);
   if (forceHeadless || !hasDisplay) {
     return { headless: true };
   }

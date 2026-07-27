@@ -211,6 +211,37 @@ export function buildCoverLetterDetailEndpoint(coverLetterId: string): string {
 }
 
 /**
+ * Endpoints the first-run setup wizard must reach before an API key exists.
+ *
+ * The setup wizard runs on a brand-new instance: `/api/auth/status` reports
+ * `bootstrapRequired: true` and there is no credential for the browser to send.
+ * Every route behind the auth guard therefore answers 401 during onboarding,
+ * which made "Test Local Endpoint" unusable on the very first screen.
+ *
+ * This is an explicit, method-scoped allowlist — not a blanket bypass. The
+ * server only honours it while no API key hash exists in the database; the
+ * moment the instance is bootstrapped the grace closes permanently. Keep the
+ * list minimal: an entry here is reachable unauthenticated on a fresh install.
+ */
+export const SETUP_PREBOOTSTRAP_ENDPOINTS = [
+  { method: "POST", path: `${API_ENDPOINT_PREFIX}/settings/test-api-key` },
+] as const;
+
+/**
+ * Reports whether a method/path pair is part of the first-run setup allowlist.
+ *
+ * @param method HTTP method of the incoming request.
+ * @param pathname Request pathname without query string.
+ * @returns True when the pair is allowlisted for pre-bootstrap access.
+ */
+export function isSetupPreBootstrapEndpoint(method: string, pathname: string): boolean {
+  const normalizedMethod = method.toUpperCase();
+  return SETUP_PREBOOTSTRAP_ENDPOINTS.some(
+    (entry) => entry.method === normalizedMethod && entry.path === pathname,
+  );
+}
+
+/**
  * Canonical WebSocket endpoints used by real-time UI flows.
  */
 export const WS_ENDPOINTS = {

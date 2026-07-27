@@ -21,12 +21,17 @@ import { writeError, writeOutput } from "./utils/cli-output";
 import { PORTFOLIO_EXPORT_THEME_BY_TEMPLATE } from "../packages/shared/src/constants/export-document-theme";
 import { assertPdfContainsRgbFill, assertRealPdfFile } from "./utils/live-pdf-assert";
 import { settlePage } from "./utils/playwright-settle";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT = resolveProofOutDir(
+  "PDF_PROOF_OUT",
+  artifactDir("live-capabilities", "pdf-live-ui"),
 );
-const OUT = process.env.PDF_PROOF_OUT ?? "/opt/cursor/artifacts/live-capabilities/pdf-live-ui";
 
 const RE_EXPORT = /Export/i;
 const RE_EXPORT_PDF = /Export PDF|^PDF$/i;

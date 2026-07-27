@@ -4,6 +4,7 @@
 import { join } from "node:path";
 import type { Locator, Page } from "playwright";
 import {
+  artifactDir,
   resolveProofClientBase,
   resolveProofEnv,
   resolveProofOutDir,
@@ -34,7 +35,7 @@ export const RE_SUBMIT_RESPONSE = /Submit|Send Response|Continue/i;
 export const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
 export const OUT = resolveProofOutDir(
   "PRODUCT_DEMO_OUT",
-  join("/opt/cursor/artifacts/baseline/product-demo-video"),
+  artifactDir("baseline", "product-demo-video"),
 );
 export const LOCAL_ENDPOINT = (
   resolveProofEnv("LOCAL_MODEL_ENDPOINT") ??

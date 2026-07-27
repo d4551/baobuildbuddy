@@ -56,6 +56,20 @@ export const stripToFormElements = (html: string): string => {
   return result.trim();
 };
 
+const retryOrEmpty = async (
+  params: Parameters<typeof generateFieldAnalysisWithRetry>[0],
+): Promise<SmartFieldAnalysisResult> => {
+  if (params.attemptsRemaining > 1) {
+    await wait(params.delayMs);
+    return generateFieldAnalysisWithRetry({
+      ...params,
+      attemptsRemaining: params.attemptsRemaining - 1,
+      delayMs: params.delayMs * 2,
+    });
+  }
+  return EMPTY_FIELD_ANALYSIS_RESULT;
+};
+
 export const generateFieldAnalysisWithRetry = (params: {
   aiService: FieldMapperAIClient;
   strippedHtml: string;
@@ -79,15 +93,7 @@ export const generateFieldAnalysisWithRetry = (params: {
     .then(
       async (response) => {
         if (response.error || !response.content) {
-          if (params.attemptsRemaining > 1) {
-            await wait(params.delayMs);
-            return generateFieldAnalysisWithRetry({
-              ...params,
-              attemptsRemaining: params.attemptsRemaining - 1,
-              delayMs: params.delayMs * 2,
-            });
-          }
-          return EMPTY_FIELD_ANALYSIS_RESULT;
+          return retryOrEmpty(params);
         }
 
         const parsedAnalysis = parseFieldAnalysisResponse(response.content);
@@ -98,27 +104,8 @@ export const generateFieldAnalysisWithRetry = (params: {
           return parsedAnalysis;
         }
 
-        if (params.attemptsRemaining > 1) {
-          await wait(params.delayMs);
-          return generateFieldAnalysisWithRetry({
-            ...params,
-            attemptsRemaining: params.attemptsRemaining - 1,
-            delayMs: params.delayMs * 2,
-          });
-        }
-
-        return EMPTY_FIELD_ANALYSIS_RESULT;
+        return retryOrEmpty(params);
       },
-      async () => {
-        if (params.attemptsRemaining > 1) {
-          await wait(params.delayMs);
-          return generateFieldAnalysisWithRetry({
-            ...params,
-            attemptsRemaining: params.attemptsRemaining - 1,
-            delayMs: params.delayMs * 2,
-          });
-        }
-        return EMPTY_FIELD_ANALYSIS_RESULT;
-      },
+      async () => retryOrEmpty(params),
     );
 };

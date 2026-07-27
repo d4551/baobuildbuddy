@@ -20,7 +20,7 @@ import {
   PORTFOLIO_SHOWCASE_TITLE_Y_OFFSET,
 } from "@bao/shared/constants/export-layout";
 import type { PortfolioMetadata } from "@bao/shared/types/portfolio";
-import { rgb } from "pdf-lib";
+import { rgb as pdfRgb } from "pdf-lib";
 import type { PortfolioRenderContext } from "./export-service-contracts";
 import { drawPortfolioWrappedText, ensurePortfolioSpace } from "./export-service-portfolio-context";
 
@@ -46,10 +46,7 @@ export function renderPortfolioSocialLinks(
   context.yPosition -= COUNT_SIXTEEN;
 }
 
-function renderPortfolioTitleBlock(
-  context: PortfolioRenderContext,
-  metadata: PortfolioMetadata,
-): void {
+function drawBannerForLayout(context: PortfolioRenderContext): void {
   if (context.layout === "showcase") {
     context.page.drawRectangle({
       x: 0,
@@ -69,12 +66,42 @@ function renderPortfolioTitleBlock(
     });
     context.yPosition = context.height - PORTFOLIO_DARK_TITLE_Y_OFFSET;
   }
+}
+
+function drawAuthorLine(context: PortfolioRenderContext, author: string, onBanner: boolean): void {
+  context.page.drawText(author, {
+    x: context.margin,
+    y: context.yPosition,
+    size: PORTFOLIO_COVER_AUTHOR_SIZE_BY_LAYOUT[context.layout],
+    font: context.font,
+    color: onBanner
+      ? pdfRgb(
+          PORTFOLIO_BANNER_MUTED_COLOR.r,
+          PORTFOLIO_BANNER_MUTED_COLOR.g,
+          PORTFOLIO_BANNER_MUTED_COLOR.b,
+        )
+      : context.colors.muted,
+  });
+  context.yPosition -= COUNT_EIGHTEEN;
+  if (onBanner) {
+    context.yPosition = Math.min(
+      context.yPosition,
+      context.height - PORTFOLIO_BANNER_AUTHOR_Y_OFFSET,
+    );
+  }
+}
+
+function renderPortfolioTitleBlock(
+  context: PortfolioRenderContext,
+  metadata: PortfolioMetadata,
+): void {
+  drawBannerForLayout(context);
 
   const title = metadata.title ?? "Portfolio";
   const titleSize = PORTFOLIO_COVER_TITLE_SIZE_BY_LAYOUT[context.layout];
   const onBanner = context.layout === "showcase" || context.layout === "banner-dark";
   const titleColor = onBanner
-    ? rgb(
+    ? pdfRgb(
         PORTFOLIO_BANNER_TITLE_COLOR.r,
         PORTFOLIO_BANNER_TITLE_COLOR.g,
         PORTFOLIO_BANNER_TITLE_COLOR.b,
@@ -96,26 +123,7 @@ function renderPortfolioTitleBlock(
     return;
   }
 
-  context.page.drawText(metadata.author, {
-    x: context.margin,
-    y: context.yPosition,
-    size: PORTFOLIO_COVER_AUTHOR_SIZE_BY_LAYOUT[context.layout],
-    font: context.font,
-    color: onBanner
-      ? rgb(
-          PORTFOLIO_BANNER_MUTED_COLOR.r,
-          PORTFOLIO_BANNER_MUTED_COLOR.g,
-          PORTFOLIO_BANNER_MUTED_COLOR.b,
-        )
-      : context.colors.muted,
-  });
-  context.yPosition -= COUNT_EIGHTEEN;
-  if (onBanner) {
-    context.yPosition = Math.min(
-      context.yPosition,
-      context.height - PORTFOLIO_BANNER_AUTHOR_Y_OFFSET,
-    );
-  }
+  drawAuthorLine(context, metadata.author, onBanner);
 }
 
 function renderPortfolioKicker(context: PortfolioRenderContext): void {
@@ -123,9 +131,7 @@ function renderPortfolioKicker(context: PortfolioRenderContext): void {
     return;
   }
   const kicker =
-    context.layout === "showcase"
-      ? "FEATURED SHIP WORK"
-      : "CASE STUDIES FOR GAME INDUSTRY HIRING";
+    context.layout === "showcase" ? "FEATURED SHIP WORK" : "CASE STUDIES FOR GAME INDUSTRY HIRING";
   context.page.drawText(kicker, {
     x: context.margin,
     y: context.yPosition,

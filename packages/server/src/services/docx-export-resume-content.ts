@@ -10,6 +10,46 @@ import {
   type ResumeSkillsData,
 } from "./docx-export-contracts";
 
+function buildDateLocationParagraph(
+  dateParts: string[],
+  location: string | undefined,
+  config: DocxTemplateConfig,
+): Paragraph {
+  const locationLine = location ? ` | ${location}` : "";
+  return new Paragraph({
+    children: [
+      new TextRun({
+        text: dateParts.join(" – ") + locationLine,
+        italics: true,
+        size: DOCX_RESUME_FONT_ACCENT_PT * 2,
+        color: config.mutedColorHex,
+        font: config.fontFamily,
+      }),
+    ],
+    spacing: { after: 40 },
+  });
+}
+
+function buildAchievementParagraphs(
+  achievements: string[] | undefined,
+  config: DocxTemplateConfig,
+): Paragraph[] {
+  if (!achievements || achievements.length === 0) return [];
+  return achievements.map(
+    (achievement) =>
+      new Paragraph({
+        bullet: { level: 0 },
+        children: [
+          new TextRun({
+            text: achievement,
+            size: DOCX_RESUME_FONT_BODY_PT * 2,
+            font: config.fontFamily,
+          }),
+        ],
+      }),
+  );
+}
+
 export function buildExperienceItem(
   item: ResumeExperienceItem,
   config: DocxTemplateConfig,
@@ -36,41 +76,29 @@ export function buildExperienceItem(
 
   const dateParts = [item.startDate, item.endDate ?? "Present"].filter(Boolean);
   if (dateParts.length > 0) {
-    const locationLine = item.location ? ` | ${item.location}` : "";
-    items.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: dateParts.join(" – ") + locationLine,
-            italics: true,
-            size: DOCX_RESUME_FONT_ACCENT_PT * 2,
-            color: config.mutedColorHex,
-            font: config.fontFamily,
-          }),
-        ],
-        spacing: { after: 40 },
-      }),
-    );
+    items.push(buildDateLocationParagraph(dateParts, item.location, config));
   }
 
-  if (item.achievements && item.achievements.length > 0) {
-    for (const achievement of item.achievements) {
-      items.push(
-        new Paragraph({
-          bullet: { level: 0 },
-          children: [
-            new TextRun({
-              text: achievement,
-              size: DOCX_RESUME_FONT_BODY_PT * 2,
-              font: config.fontFamily,
-            }),
-          ],
-        }),
-      );
-    }
-  }
-
+  items.push(...buildAchievementParagraphs(item.achievements, config));
   return items;
+}
+
+function buildGpaParagraph(gpa: string, config: DocxTemplateConfig): Paragraph {
+  return new Paragraph({
+    children: [
+      new TextRun({
+        text: "GPA: ",
+        bold: true,
+        size: DOCX_RESUME_FONT_ACCENT_PT * 2,
+        font: config.fontFamily,
+      }),
+      new TextRun({
+        text: gpa,
+        size: DOCX_RESUME_FONT_ACCENT_PT * 2,
+        font: config.fontFamily,
+      }),
+    ],
+  });
 }
 
 export function buildEducationItem(
@@ -115,23 +143,7 @@ export function buildEducationItem(
   }
 
   if (item.gpa) {
-    items.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: "GPA: ",
-            bold: true,
-            size: DOCX_RESUME_FONT_ACCENT_PT * 2,
-            font: config.fontFamily,
-          }),
-          new TextRun({
-            text: item.gpa,
-            size: DOCX_RESUME_FONT_ACCENT_PT * 2,
-            font: config.fontFamily,
-          }),
-        ],
-      }),
-    );
+    items.push(buildGpaParagraph(item.gpa, config));
   }
 
   return items;

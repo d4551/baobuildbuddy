@@ -21,13 +21,18 @@ import { assertLiveInference } from "./utils/live-ai-probe";
 import { pollUntil } from "./utils/async-control";
 import { createChatNonceProbe } from "./utils/playwright-chat-probe";
 import { settlePage } from "./utils/playwright-settle";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofEnv,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT = resolveProofOutDir(
+  "OLLAMA_PROOF_OUT",
+  artifactDir("live-capabilities", "ollama-live-ui"),
 );
-const OUT =
-  process.env.OLLAMA_PROOF_OUT ?? "/opt/cursor/artifacts/live-capabilities/ollama-live-ui";
 const SEND_BUTTON_PATTERN = /send/iu;
 const LOCAL_PROVIDER_PATTERN = /Local Model/i;
 const TEST_ARIA_PATTERN = /Test AI provider connection/i;
@@ -36,8 +41,8 @@ const CONNECTED_PATTERN = /Connected/i;
 const ENDPOINT_LABEL_PATTERN = /Endpoint URL/i;
 const MODEL_LABEL_PATTERN = /Local model name/i;
 const ENDPOINT =
-  process.env.LOCAL_MODEL_ENDPOINT?.replace(/\/$/u, "") ?? "http://127.0.0.1:11434/v1";
-const MODEL = process.env.LOCAL_MODEL_NAME?.trim() || "llama3.2:1b";
+  resolveProofEnv("LOCAL_MODEL_ENDPOINT")?.replace(/\/$/u, "") ?? "http://127.0.0.1:11434/v1";
+const MODEL = resolveProofEnv("LOCAL_MODEL_NAME")?.trim() || "llama3.2:1b";
 
 const wait = settlePage;
 

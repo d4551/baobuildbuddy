@@ -12,6 +12,7 @@ import {
   RADIUS_TOKEN_CLASS,
   TYPOGRAPHY_SCALE_CLASS,
 } from "~/constants/layout";
+import { UI_STAGGER_INDEX_MAX } from "~/constants/numeric-ui";
 
 defineProps<{
   orderedCards: readonly AutomationHubCard[];
@@ -23,10 +24,12 @@ const { t } = useI18n();
 
 <template>
   <SectionGrid grid-token="twoColumnWide">
-    <div 
-      v-for="card in orderedCards"
+    <UiGlassCard
+      v-for="(card, index) in orderedCards"
       :key="card.id"
-      class="card card-border bg-base-100 transition-colors hover:bg-base-200" :class="[FLUID_HEIGHT_CLASS, primaryCardId === card.id ? 'ring-2 ring-primary/40' : '']"
+      :selected="primaryCardId === card.id"
+      :stagger-index="Math.min(index, UI_STAGGER_INDEX_MAX)"
+      :extra-class="FLUID_HEIGHT_CLASS"
     >
       <div class="card-body">
         <div class="flex items-center justify-between" :class="[FLEX_GAP_TOKEN_CLASS.gap2]">
@@ -54,6 +57,6 @@ const { t } = useI18n();
           </NuxtLink>
         </div>
       </div>
-    </div>
+    </UiGlassCard>
   </SectionGrid>
 </template>

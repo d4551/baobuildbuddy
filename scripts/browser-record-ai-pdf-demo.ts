@@ -26,15 +26,21 @@ import { assertLiveInference } from "./utils/live-ai-probe";
 import { PORTFOLIO_EXPORT_THEME_BY_TEMPLATE } from "../packages/shared/src/constants/export-document-theme";
 import { assertPdfContainsRgbFill, assertRealPdfFile } from "./utils/live-pdf-assert";
 import { settlePage } from "./utils/playwright-settle";
+import {
+  artifactDir,
+  resolveProofClientBase,
+  resolveProofEnv,
+  resolveProofOutDir,
+} from "./utils/proof-script-env";
 
-const CLIENT_BASE = (process.env.PAGE_PROOF_CLIENT_BASE ?? "http://127.0.0.1:3001").replace(
-  /\/$/u,
-  "",
+const CLIENT_BASE = resolveProofClientBase("http://127.0.0.1:3001");
+const OUT = resolveProofOutDir(
+  "AI_PDF_DEMO_OUT",
+  artifactDir("baseline", "ai-pdf-video"),
 );
-const OUT = process.env.AI_PDF_DEMO_OUT ?? "/opt/cursor/artifacts/baseline/ai-pdf-video";
-const MODEL = process.env.LOCAL_MODEL_NAME?.trim() || "llama3.2:1b";
+const MODEL = resolveProofEnv("LOCAL_MODEL_NAME")?.trim() || "llama3.2:1b";
 const ENDPOINT =
-  process.env.LOCAL_MODEL_ENDPOINT?.replace(/\/$/u, "") ?? "http://127.0.0.1:11434/v1";
+  resolveProofEnv("LOCAL_MODEL_ENDPOINT")?.replace(/\/$/u, "") ?? "http://127.0.0.1:11434/v1";
 
 const SEND_BUTTON_PATTERN = /send/iu;
 const RE_EXPORT_PDF = /Export PDF|^PDF$/i;

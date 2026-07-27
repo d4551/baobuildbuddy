@@ -21,6 +21,7 @@ import {
   HTTP_STATUS_SERVICE_UNAVAILABLE,
 } from "@bao/shared/constants/http";
 import { DEFAULT_PROFILE_ID, DEFAULT_SETTINGS_ID } from "@bao/shared/types/settings-defaults";
+import { toErrorMessage } from "@bao/shared/utils/error-helpers";
 import { settle } from "@bao/shared/utils/promise";
 import { generateId } from "@bao/shared/utils/validation";
 import { eq } from "drizzle-orm";
@@ -104,9 +105,9 @@ const toJsonRecord = (value: unknown): Record<string, unknown> => {
   return record;
 };
 
-const createCoverLetterExportError = (reason: unknown) => {
+const createCoverLetterExportError = <Reason>(reason: Reason) => {
   coverLetterGenerationLogger.error("Cover letter export failed", {
-    reason: reason instanceof Error ? reason.message : API_ERROR_UNKNOWN,
+    reason: toErrorMessage(reason, API_ERROR_UNKNOWN),
   });
   return {
     error: API_ERROR_EXPORT_COVER_LETTER,
@@ -159,8 +160,11 @@ export const handleGenerateCoverLetter = async (
     }),
   );
   if (aiResult.status === "rejected") {
+    // Route through toErrorMessage rather than reading `.message` directly: the
+    // provider quotes the rejected credential in its message, and that helper is
+    // where secret redaction is applied.
     coverLetterGenerationLogger.error("Cover letter AI generation rejected", {
-      reason: aiResult.reason instanceof Error ? aiResult.reason.message : API_ERROR_UNKNOWN,
+      reason: toErrorMessage(aiResult.reason, API_ERROR_UNKNOWN),
     });
     set.status = HTTP_STATUS_INTERNAL_SERVER_ERROR;
     return {
