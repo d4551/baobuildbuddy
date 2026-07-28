@@ -101,6 +101,11 @@ const DESKTOP_RELEASE_ROOT_ALLOWED_FILES = new Set<string>([
   "README.md",
   "provenance.json",
   "sha256.txt",
+  // Committed SSOT: byte-size fallback for the docs-site manifest builder when
+  // the on-disk artifact is a Git LFS pointer (CI checkouts have no real
+  // bytes). It is hand-synced (no writer script), so pruning it here would
+  // silently destroy it on every local refresh+commit. Preserve it instead.
+  "sizes.json",
 ]);
 const DESKTOP_RELEASE_ROOT_ALLOWED_DIRECTORIES = new Set<string>([
   DESKTOP_RELEASE_METADATA_DIR,
