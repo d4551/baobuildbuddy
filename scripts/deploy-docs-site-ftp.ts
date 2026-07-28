@@ -1,7 +1,7 @@
 /**
  * Publishes the staged docs site to the static web host over FTPS.
  *
- * The site (https://baobuildbuddy.com) is served from an FTP-backed static host,
+ * The site (https://bao.builders) is served from an FTP-backed static host,
  * and nothing in the repo previously drove that upload — the page and its release
  * artifacts were generated but never shipped. This is that missing step.
  *

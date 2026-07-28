@@ -12,10 +12,10 @@
     "~/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin",
     "hdiutil create -srcfolder ./packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BaoBuildBuddy.app ./packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_0.1.0_aarch64.dmg"
   ],
-  "builtAt": "2026-07-26T15:31:50.089Z",
+  "builtAt": "2026-07-28T01:08:19.602Z",
   "ci": {
-    "workflow": null,
-    "runId": null,
-    "runAttempt": null
+    "workflow": "desktop-release",
+    "runId": "30318719231",
+    "runAttempt": "1"
   }
 }

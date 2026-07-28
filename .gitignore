@@ -82,6 +82,10 @@ docs/releases/
 # Desktop release staging (CI produces artifacts; do not commit local builds)
 .desktop-release-artifacts/
 
+# Scratch dir for downloaded CI release artifacts (e.g. all-OS desktop-release run
+# payloads pulled for refreshing the canonical packages/desktop/releases tree).
+.desktop-release-input/
+
 # Browser visual proof output (generated screenshots + reports)
 artifacts/
 
