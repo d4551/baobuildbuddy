@@ -11,8 +11,10 @@
     "BaoBuildBuddy-0.1.0-1.x86_64.rpm",
     "BaoBuildBuddy_0.1.0_amd64.AppImage"
   ],
-  "buildCommands": ["~/.bun/bin/bun tauri build --bundles deb,rpm,appimage --verbose"],
-  "builtAt": "2026-07-25T10:26:33.621Z",
+  "buildCommands": [
+    "~/.local/lib/node_modules/bun/bin/bun.exe tauri build --bundles deb,rpm,appimage --verbose"
+  ],
+  "builtAt": "2026-07-28T00:49:53.783Z",
   "ci": {
     "workflow": null,
     "runId": null,
