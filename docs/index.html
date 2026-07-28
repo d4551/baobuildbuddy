@@ -2,11 +2,12 @@
 <html lang="en" data-theme="corporate">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>BaoBuildBuddy | AI Help For Videogame Job Seekers</title>
     <meta name="description" content="BaoBuildBuddy helps videogame job seekers find roles, tailor applications, set up Ollama, and move through repetitive application steps faster." />
     <link rel="canonical" href="https://bao.builders/" />
     <meta name="theme-color" content="#2d3570" />
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
 
     <!-- Open Graph / social -->
@@ -43,7 +44,7 @@
       }
 
       html {
-        scroll-padding-top: 5rem;
+        scroll-padding-top: 5.5rem;
       }
 
       /* Skip-to-content link (a11y) */
@@ -137,12 +138,29 @@
         background: radial-gradient(circle, oklch(var(--color-info) / 0.24), transparent 68%);
       }
 
+      /* 3 OS tabs always fit one row on phones — minmax(0,1fr) lets them shrink
+         instead of forcing a 30rem row that overflows into horizontal scroll. */
       .downloads-tablist {
-        grid-template-columns: repeat(3, minmax(10rem, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .downloads-tab {
         min-height: 3.5rem;
+        min-width: 0;
+      }
+
+      /* Theme toggle: daisyUI `.swap` is inline-grid but `.btn` is inline-flex; on
+         the same element `.btn` wins and breaks the swap's grid centering, so
+         the icon sits off-center in the circle. Restore inline-grid here (higher
+         specificity than `.btn`) so the swap's place-content:center re-centers
+         the sun/moon icon. */
+      header .swap.swap-rotate {
+        display: inline-grid;
+      }
+      .downloads-tab .tab-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .release-grid {
@@ -175,10 +193,13 @@
         font-family: var(--font-mono);
         font-size: 0.7rem;
         letter-spacing: 0.02em;
+        flex-wrap: wrap;
+        row-gap: 0.25rem;
       }
       .release-sha code {
         display: inline-block;
-        max-width: 12rem;
+        max-width: 100%;
+        min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -247,13 +268,11 @@
       }
 
       @media (max-width: 767px) {
+        /* Tabs now fit one row (minmax(0,1fr)); keep the scroller only as a
+           safety net for ultra-narrow viewports so content never clips. */
         .downloads-tab-scroller {
           overflow-x: auto;
-          padding-bottom: 0.25rem;
-        }
-        .downloads-tablist {
-          width: max-content;
-          min-width: 100%;
+          -webkit-overflow-scrolling: touch;
         }
       }
 
@@ -284,7 +303,7 @@
     <header class="fixed inset-x-0 top-0 z-50 border-b border-base-300 bg-base-100/88 backdrop-blur">
       <div class="navbar page-shell min-h-16 px-4 sm:min-h-20 sm:px-6 lg:px-8">
       <div class="navbar-start">
-        <details class="dropdown lg:hidden">
+        <details class="dropdown md:hidden">
           <summary class="btn btn-ghost btn-circle btn-sm mr-2 list-none" aria-label="Open navigation menu">
             <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -310,11 +329,11 @@
           <span class="hidden sm:inline">BaoBuildBuddy</span>
         </a>
       </div>
-      <nav class="navbar-center hidden lg:flex" aria-label="Main Navigation">
+      <nav class="navbar-center hidden md:flex" aria-label="Main Navigation">
         <ul class="menu menu-horizontal px-1 gap-2 font-medium">
-          <li><a href="#downloads" data-nav-target="downloads" aria-label="Go to Downloads section" class="h-10 flex items-center">Downloads</a></li>
-          <li><a href="#ollama" data-nav-target="ollama" aria-label="Go to Ollama setup section" class="h-10 flex items-center">Set Up Ollama</a></li>
-          <li><a href="#how-it-helps" data-nav-target="how-it-helps" aria-label="Go to how BaoBuildBuddy helps section" class="h-10 flex items-center">How It Helps</a></li>
+          <li><a href="#downloads" data-nav-target="downloads" aria-label="Go to Downloads section" class="h-11 flex items-center">Downloads</a></li>
+          <li><a href="#ollama" data-nav-target="ollama" aria-label="Go to Ollama setup section" class="h-11 flex items-center">Set Up Ollama</a></li>
+          <li><a href="#how-it-helps" data-nav-target="how-it-helps" aria-label="Go to how BaoBuildBuddy helps section" class="h-11 flex items-center">How It Helps</a></li>
         </ul>
       </nav>
       <div class="navbar-end gap-3">
@@ -323,8 +342,8 @@
         </a>
         <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm h-10 w-10" aria-label="Toggle theme">
           <input type="checkbox" id="theme-toggle" class="theme-controller" value="business" aria-label="Toggle theme" />
-          <svg aria-hidden="true" class="swap-off fill-current w-5 h-5 absolute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
-          <svg aria-hidden="true" class="swap-on fill-current w-5 h-5 absolute" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
+          <svg aria-hidden="true" class="swap-off fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,6.34Zm12,.29a1,1,0,0,0,.7-.29l.71-.71a1,1,0,1,0-1.41-1.41L17,5.64a1,1,0,0,0,0,1.41A1,1,0,0,0,17.66,7.34ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM18.36,17A1,1,0,0,0,17,18.36l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM12,6.5A5.5,5.5,0,1,0,17.5,12,5.51,5.51,0,0,0,12,6.5Zm0,9A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z"/></svg>
+          <svg aria-hidden="true" class="swap-on fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
         </label>
         <a href="#downloads" aria-label="Go to downloads section" class="btn btn-neutral btn-sm h-10 px-4 hidden sm:flex items-center gap-2 m-0">
           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
@@ -350,7 +369,7 @@
             <span class="badge badge-outline badge-neutral font-medium" data-app-version-badge>v0.1.0</span>
           </div>
 
-          <h1 id="hero-heading" class="text-4xl md:text-6xl lg:text-7xl font-bold font-display tracking-tight text-balance leading-tight text-base-content">
+          <h1 id="hero-heading" class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-display tracking-tight text-balance leading-tight text-base-content">
             Use AI to move faster in videogame job hunting
           </h1>
 
@@ -407,9 +426,9 @@
           <label class="downloads-tab tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="Windows Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-windows" checked="checked" />
             <svg aria-hidden="true" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M96 96H247V247H96" fill="#f24f23"></path><path d="M265 96V247H416V96" fill="#7eba03"></path><path d="M96 265H247V416H96" fill="#3ca4ef"></path><path d="M265 265H416V416H265" fill="#f9ba00"></path></svg>
-            Windows
+            <span class="tab-label">Windows</span>
           </label>
-          <div role="tabpanel" id="panel-windows" class="tab-content pt-10 col-span-3">
+          <div role="tabpanel" id="panel-windows" class="tab-content pt-6 sm:pt-10 col-span-3">
             <div class="text-center mb-6">
               <svg aria-hidden="true" class="mx-auto w-12 h-12 mb-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M96 96H247V247H96" fill="#f24f23"></path><path d="M265 96V247H416V96" fill="#7eba03"></path><path d="M96 265H247V416H96" fill="#3ca4ef"></path><path d="M265 265H416V416H265" fill="#f9ba00"></path></svg>
               <h3 class="text-xl font-bold">Windows downloads</h3>
@@ -434,9 +453,9 @@
           <label class="downloads-tab tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="macOS Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-macos" />
             <svg aria-hidden="true" class="w-5 h-5 text-base-content" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1195 1195"><path fill="currentColor" d="M1006.933 812.8c-32 153.6-115.2 211.2-147.2 249.6-32 25.6-121.6 25.6-153.6 6.4-38.4-25.6-134.4-25.6-166.4 0-44.8 32-115.2 19.2-128 12.8-256-179.2-352-716.8 12.8-774.4 64-12.8 134.4 32 134.4 32 51.2 25.6 70.4 12.8 115.2-6.4 96-44.8 243.2-44.8 313.6 76.8-147.2 96-153.6 294.4 19.2 403.2zM802.133 64c12.8 70.4-64 224-204.8 230.4-12.8-38.4 32-217.6 204.8-230.4z"></path></svg>
-            macOS
+            <span class="tab-label">macOS</span>
           </label>
-          <div role="tabpanel" id="panel-macos" class="tab-content pt-10 col-span-3">
+          <div role="tabpanel" id="panel-macos" class="tab-content pt-6 sm:pt-10 col-span-3">
             <div class="text-center mb-6">
               <svg aria-hidden="true" class="mx-auto w-12 h-12 text-base-content mb-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1195 1195"><path fill="currentColor" d="M1006.933 812.8c-32 153.6-115.2 211.2-147.2 249.6-32 25.6-121.6 25.6-153.6 6.4-38.4-25.6-134.4-25.6-166.4 0-44.8 32-115.2 19.2-128 12.8-256-179.2-352-716.8 12.8-774.4 64-12.8 134.4 32 134.4 32 51.2 25.6 70.4 12.8 115.2-6.4 96-44.8 243.2-44.8 313.6 76.8-147.2 96-153.6 294.4 19.2 403.2zM802.133 64c12.8 70.4-64 224-204.8 230.4-12.8-38.4 32-217.6 204.8-230.4z"></path></svg>
               <h3 class="text-xl font-bold">Mac downloads</h3>
@@ -461,9 +480,9 @@
           <label class="downloads-tab tab flex items-center justify-center gap-2 font-medium hover:bg-base-200 transition-colors" aria-label="Linux Downloads">
             <input type="radio" name="os_tabs" aria-controls="panel-linux" />
             <img src="assets/tux.svg" class="w-5 h-5 object-contain" alt="" aria-hidden="true" />
-            Linux
+            <span class="tab-label">Linux</span>
           </label>
-          <div role="tabpanel" id="panel-linux" class="tab-content pt-10 col-span-3">
+          <div role="tabpanel" id="panel-linux" class="tab-content pt-6 sm:pt-10 col-span-3">
              <div class="text-center mb-6">
               <img src="assets/tux.svg" class="mx-auto w-12 h-12 mb-2 object-contain" alt="" aria-hidden="true" />
               <h3 class="text-xl font-bold">Linux downloads</h3>
