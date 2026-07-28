@@ -6,12 +6,16 @@
   "hostPlatform": "win32",
   "hostArch": "x64",
   "tauriTarget": "x86_64-pc-windows-msvc",
-  "artifactNames": ["BaoBuildBuddy_0.1.0_x64-portable.zip", "BaoBuildBuddy_0.1.0_x64-setup.exe"],
-  "buildCommands": ["stage-only repaired existing bundled artifacts for x86_64-pc-windows-msvc"],
-  "builtAt": "2026-03-18T00:00:00.000Z",
+  "artifactNames": [
+    "BaoBuildBuddy_0.1.0_x64-setup.exe",
+    "BaoBuildBuddy_0.1.0_x64-portable.zip",
+    "BaoBuildBuddy_0.1.0_x64_en-US.msi"
+  ],
+  "buildCommands": ["<home>\\.bun\\bin\\bun.exe tauri build --bundles nsis,msi"],
+  "builtAt": "2026-07-28T01:18:55.240Z",
   "ci": {
-    "workflow": null,
-    "runId": null,
-    "runAttempt": null
+    "workflow": "desktop-release",
+    "runId": "30318719231",
+    "runAttempt": "1"
   }
 }

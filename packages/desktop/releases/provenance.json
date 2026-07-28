@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "assembledAt": "2026-07-28T00:52:17.980Z",
-  "sourceRoot": ".desktop-release-artifacts",
+  "assembledAt": "2026-07-28T01:21:47.775Z",
+  "sourceRoot": ".desktop-release-input",
   "targets": {
     "macos": {
       "schemaVersion": 1,
@@ -17,11 +17,11 @@
         "~/.bun/bin/bun tauri bundle --bundles app --target aarch64-apple-darwin",
         "hdiutil create -srcfolder ./packages/desktop/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/BaoBuildBuddy.app ./packages/desktop/src-tauri/target/release/bundle/dmg/BaoBuildBuddy_0.1.0_aarch64.dmg"
       ],
-      "builtAt": "2026-07-26T15:31:50.089Z",
+      "builtAt": "2026-07-28T01:08:19.602Z",
       "ci": {
-        "workflow": null,
-        "runId": null,
-        "runAttempt": null
+        "workflow": "desktop-release",
+        "runId": "30318719231",
+        "runAttempt": "1"
       }
     },
     "linux-x64": {
@@ -37,14 +37,12 @@
         "BaoBuildBuddy-0.1.0-1.x86_64.rpm",
         "BaoBuildBuddy_0.1.0_amd64.AppImage"
       ],
-      "buildCommands": [
-        "~/.local/lib/node_modules/bun/bin/bun.exe tauri build --bundles deb,rpm,appimage --verbose"
-      ],
-      "builtAt": "2026-07-28T00:49:53.783Z",
+      "buildCommands": ["~/.bun/bin/bun tauri build --bundles deb,rpm,appimage --verbose"],
+      "builtAt": "2026-07-28T01:13:13.727Z",
       "ci": {
-        "workflow": null,
-        "runId": null,
-        "runAttempt": null
+        "workflow": "desktop-release",
+        "runId": "30318719231",
+        "runAttempt": "1"
       }
     },
     "linux-arm64": {
@@ -56,12 +54,12 @@
       "hostArch": "arm64",
       "tauriTarget": "aarch64-unknown-linux-gnu",
       "artifactNames": ["BaoBuildBuddy_0.1.0_arm64.deb", "BaoBuildBuddy-0.1.0-1.aarch64.rpm"],
-      "buildCommands": ["stage-only existing bundled artifacts for aarch64-unknown-linux-gnu"],
-      "builtAt": "2026-03-18T00:00:00.000Z",
+      "buildCommands": ["~/.bun/bin/bun tauri build --bundles deb,rpm --verbose"],
+      "builtAt": "2026-07-28T01:12:33.489Z",
       "ci": {
-        "workflow": null,
-        "runId": null,
-        "runAttempt": null
+        "workflow": "desktop-release",
+        "runId": "30318719231",
+        "runAttempt": "1"
       }
     },
     "windows": {
@@ -73,17 +71,16 @@
       "hostArch": "x64",
       "tauriTarget": "x86_64-pc-windows-msvc",
       "artifactNames": [
+        "BaoBuildBuddy_0.1.0_x64-setup.exe",
         "BaoBuildBuddy_0.1.0_x64-portable.zip",
-        "BaoBuildBuddy_0.1.0_x64-setup.exe"
+        "BaoBuildBuddy_0.1.0_x64_en-US.msi"
       ],
-      "buildCommands": [
-        "stage-only repaired existing bundled artifacts for x86_64-pc-windows-msvc"
-      ],
-      "builtAt": "2026-03-18T00:00:00.000Z",
+      "buildCommands": ["<home>\\.bun\\bin\\bun.exe tauri build --bundles nsis,msi"],
+      "builtAt": "2026-07-28T01:18:55.240Z",
       "ci": {
-        "workflow": null,
-        "runId": null,
-        "runAttempt": null
+        "workflow": "desktop-release",
+        "runId": "30318719231",
+        "runAttempt": "1"
       }
     }
   }
