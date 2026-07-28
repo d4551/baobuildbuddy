@@ -11,7 +11,7 @@
  */
 import { existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import { chromium } from "playwright";
+import { chromium, type BrowserContext, type Page } from "playwright";
 import { writeError, writeOutput } from "./utils/cli-output";
 import { artifactDir, resolveProofEnv, resolveProofOutDir } from "./utils/proof-script-env";
 
@@ -59,7 +59,7 @@ const mapSequential = async <Item, Result>(
   return [head, ...rest];
 };
 
-const startLocalServer = (port: number): { url: string; stop: () => void } => {
+const startLocalServer = (port: number): { url: string; stop: () => Promise<void> } => {
   const server = Bun.serve({
     port,
     fetch(req) {
@@ -74,18 +74,16 @@ const startLocalServer = (port: number): { url: string; stop: () => void } => {
   return { url: `http://127.0.0.1:${String(port)}/`, stop: () => server.stop() };
 };
 
-const waitForCards = async (page: {
-  locator: (selector: string) => { waitFor: (opts: { timeout: number }) => Promise<unknown> };
-}): Promise<void> => {
+const waitForCards = async (page: Page): Promise<void> => {
   await page
     .locator(CARD_SELECTOR)
     .first()
     .waitFor({ timeout: NUM_10_000 })
-    .catch(() => undefined);
+    .then(() => undefined, () => undefined);
 };
 
 const proofViewport = async (
-  context: { newPage: () => Promise<import("playwright").Page> },
+  context: BrowserContext,
   viewport: Viewport,
   baseUrl: string,
 ): Promise<ViewportProof> => {
@@ -97,12 +95,12 @@ const proofViewport = async (
   await page
     .locator("#downloads")
     .scrollIntoViewIfNeeded()
-    .catch(() => undefined);
+    .then(() => undefined, () => undefined);
   await page
     .locator(CARD_SELECTOR)
     .last()
     .waitFor({ timeout: NUM_10_000 })
-    .catch(() => undefined);
+    .then(() => undefined, () => undefined);
   await page.screenshot({ path: resolve(OUT_DIR, `${viewport.name}-downloads.png`) });
 
   const metrics = await page.evaluate(() => {
@@ -136,14 +134,14 @@ const main = async (): Promise<void> => {
     await writeError(`No dist/docs-site at ${DIST_ROOT}. Run "bun run docs-site:bundle" first.`);
     process.exit(1);
   }
-  const host = TARGET ? { url: TARGET, stop: () => undefined } : startLocalServer(NUM_4567);
+  const host = TARGET ? { url: TARGET, stop: () => Promise.resolve() } : startLocalServer(NUM_4567);
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const results = await mapSequential(VIEWPORTS, (viewport) =>
     proofViewport(context, viewport, host.url),
   );
   await browser.close();
-  host.stop();
+  await host.stop();
 
   const lines = results.map(
     (result) =>
