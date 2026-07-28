@@ -4,33 +4,63 @@
  * visible without scrolling — the two regressions most likely to slip past curl.
  *
  * Usage:
- *   bun run scripts/docs-ui-proof.ts                 # serve dist/docs-site locally, then proof
- *   TARGET=https://bao.builders/ bun run scripts/docs-ui-proof.ts   # proof a live URL
+ *   bun run scripts/docs-ui-proof.ts                              # serve dist/docs-site locally, then proof
+ *   TARGET=https://bao.builders/ bun run scripts/docs-ui-proof.ts  # proof a live URL
  *
- * Output: artifacts/docs-ui-proof/<viewport>-downloads.png + a pass/fail summary.
+ * Output: <out>/<viewport>-downloads.png + a PASS/FAIL summary.
  */
-import { chromium } from "playwright";
 import { existsSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
+import { chromium } from "playwright";
+import { writeError, writeOutput } from "./utils/cli-output";
+import { artifactDir, resolveProofEnv, resolveProofOutDir } from "./utils/proof-script-env";
+
+const NUM_1 = 1;
+const NUM_4567 = 4567;
+const NUM_10_000 = 10_000;
+const NUM_800 = 800;
+const NUM_844 = 844;
+const NUM_1024 = 1024;
+const NUM_1280 = 1280;
+const NUM_390 = 390;
+const NUM_768 = 768;
 
 const REPO_ROOT = new URL("../", import.meta.url).pathname;
 const DIST_ROOT = resolve(REPO_ROOT, "dist/docs-site");
-const OUT = resolve(REPO_ROOT, "artifacts/docs-ui-proof");
-mkdirSync(OUT, { recursive: true });
+const OUT_DIR = resolveProofOutDir("DOCS_UI_PROOF_OUT", artifactDir("docs-ui-proof"));
+const TARGET = resolveProofEnv("TARGET");
+const CARD_SELECTOR = '[data-platform="windows"] .card';
 
-const target = process.env.TARGET;
-let baseUrl: string;
-let server: { stop: () => void } | null = null;
+type Viewport = { readonly name: string; readonly width: number; readonly height: number };
 
-if (target) {
-  baseUrl = target;
-} else {
-  if (!existsSync(DIST_ROOT)) {
-    console.error(`No dist/docs-site at ${DIST_ROOT}. Run "bun run docs-site:bundle" first.`);
-    process.exit(1);
-  }
-  const port = 4567;
-  server = Bun.serve({
+const VIEWPORTS: readonly Viewport[] = [
+  { name: "mobile", width: NUM_390, height: NUM_844 },
+  { name: "tablet", width: NUM_768, height: NUM_1024 },
+  { name: "desktop", width: NUM_1280, height: NUM_800 },
+] as const;
+
+type ViewportProof = {
+  readonly viewport: string;
+  readonly overflow: boolean;
+  readonly documentScrollWidth: number;
+  readonly innerWidth: number;
+  readonly tabsAllVisible: boolean;
+  readonly ok: boolean;
+};
+
+const mapSequential = async <Item, Result>(
+  items: readonly Item[],
+  mapper: (item: Item, index: number) => Promise<Result>,
+  index = 0,
+): Promise<Result[]> => {
+  if (index >= items.length) return [];
+  const head = await mapper(items[index], index);
+  const rest = await mapSequential(items, mapper, index + NUM_1);
+  return [head, ...rest];
+};
+
+const startLocalServer = (port: number): { url: string; stop: () => void } => {
+  const server = Bun.serve({
     port,
     fetch(req) {
       const url = new URL(req.url);
@@ -41,43 +71,97 @@ if (target) {
       return new Response(Bun.file(file));
     },
   });
-  baseUrl = `http://127.0.0.1:${port}/`;
-}
+  return { url: `http://127.0.0.1:${String(port)}/`, stop: () => server.stop() };
+};
 
-const browser = await chromium.launch();
-const ctx = await browser.newContext();
-const viewports = [
-  { name: "mobile", width: 390, height: 844 },
-  { name: "tablet", width: 768, height: 1024 },
-  { name: "desktop", width: 1280, height: 800 },
-];
-const results: string[] = [];
-for (const vp of viewports) {
-  const page = await ctx.newPage();
-  await page.setViewportSize({ width: vp.width, height: vp.height });
-  await page.goto(baseUrl, { waitUntil: "networkidle" });
+const waitForCards = async (page: {
+  locator: (selector: string) => { waitFor: (opts: { timeout: number }) => Promise<unknown> };
+}): Promise<void> => {
   await page
-    .waitForSelector('[data-platform="windows"] .card', { timeout: 10000 })
-    .catch(() => {});
-  await page.locator("#downloads").scrollIntoViewIfNeeded().catch(() => {});
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: `${OUT}/${vp.name}-downloads.png` });
-  const ov = await page.evaluate(() => ({
-    sw: document.documentElement.scrollWidth,
-    iw: window.innerWidth,
-  }));
-  const tabsVisible = await page.$$eval(".downloads-tab .tab-label", (els) =>
-    els.every((e) => {
-      const r = (e as HTMLElement).getBoundingClientRect();
-      return r.left >= 0 && r.right <= window.innerWidth && r.width > 0;
-    }),
-  );
-  const overflow = ov.sw > ov.iw + 1;
-  results.push(`${vp.name}: overflow=${overflow} (sw=${ov.sw} iw=${ov.iw}) tabsAllVisible=${tabsVisible} ${overflow || !tabsVisible ? "FAIL" : "PASS"}`);
+    .locator(CARD_SELECTOR)
+    .first()
+    .waitFor({ timeout: NUM_10_000 })
+    .catch(() => undefined);
+};
+
+const proofViewport = async (
+  context: { newPage: () => Promise<import("playwright").Page> },
+  viewport: Viewport,
+  baseUrl: string,
+): Promise<ViewportProof> => {
+  const page = await context.newPage();
+  await page.setViewportSize({ width: viewport.width, height: viewport.height });
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded", timeout: NUM_10_000 });
+  await page.locator("body").waitFor({ state: "visible", timeout: NUM_10_000 });
+  await waitForCards(page);
+  await page
+    .locator("#downloads")
+    .scrollIntoViewIfNeeded()
+    .catch(() => undefined);
+  await page
+    .locator(CARD_SELECTOR)
+    .last()
+    .waitFor({ timeout: NUM_10_000 })
+    .catch(() => undefined);
+  await page.screenshot({ path: resolve(OUT_DIR, `${viewport.name}-downloads.png`) });
+
+  const metrics = await page.evaluate(() => {
+    const labels = Array.from(document.querySelectorAll(".downloads-tab .tab-label"));
+    const tabsAllVisible = labels.every((label) => {
+      const rect = label.getBoundingClientRect();
+      return rect.left >= 0 && rect.right <= window.innerWidth && rect.width > 0;
+    });
+    return {
+      documentScrollWidth: document.documentElement.scrollWidth,
+      innerWidth: window.innerWidth,
+      tabsAllVisible,
+    };
+  });
+
   await page.close();
-}
-await browser.close();
-server?.stop();
-console.log(results.join("\n"));
-console.log("screenshots ->", OUT);
-if (results.some((r) => r.endsWith("FAIL"))) process.exit(1);
+  const overflow = metrics.documentScrollWidth > metrics.innerWidth + NUM_1;
+  return {
+    viewport: viewport.name,
+    overflow,
+    documentScrollWidth: metrics.documentScrollWidth,
+    innerWidth: metrics.innerWidth,
+    tabsAllVisible: metrics.tabsAllVisible,
+    ok: !overflow && metrics.tabsAllVisible,
+  };
+};
+
+const main = async (): Promise<void> => {
+  mkdirSync(OUT_DIR, { recursive: true });
+  if (!TARGET && !existsSync(DIST_ROOT)) {
+    await writeError(`No dist/docs-site at ${DIST_ROOT}. Run "bun run docs-site:bundle" first.`);
+    process.exit(1);
+  }
+  const host = TARGET ? { url: TARGET, stop: () => undefined } : startLocalServer(NUM_4567);
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const results = await mapSequential(VIEWPORTS, (viewport) =>
+    proofViewport(context, viewport, host.url),
+  );
+  await browser.close();
+  host.stop();
+
+  const lines = results.map(
+    (result) =>
+      `${result.viewport}: overflow=${String(result.overflow)} (sw=${String(result.documentScrollWidth)} iw=${String(result.innerWidth)}) tabsAllVisible=${String(result.tabsAllVisible)} ${result.ok ? "PASS" : "FAIL"}`,
+  );
+  await writeOutput(`${lines.join("\n")}\nscreenshots -> ${OUT_DIR}`);
+  const failures = results.filter((result) => !result.ok);
+  if (failures.length > 0) {
+    await writeError(
+      failures
+        .map(
+          (failure) =>
+            `${failure.viewport}: overflow=${String(failure.overflow)} tabsAllVisible=${String(failure.tabsAllVisible)}`,
+        )
+        .join("\n"),
+    );
+    process.exitCode = 1;
+  }
+};
+
+await main();
