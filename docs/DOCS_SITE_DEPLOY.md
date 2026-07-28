@@ -1,6 +1,6 @@
 # Docs Site Deployment
 
-How the public download site (`docs/`, served at <https://baobuildbuddy.com>) gets published
+How the public download site (`docs/`, served at <https://bao.builders>) gets published
 to the FTP-backed static host.
 
 ## What ships
